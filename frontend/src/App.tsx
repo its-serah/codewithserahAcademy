@@ -24,8 +24,22 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/courses" element={<CourseList />} />
-          <Route path="/courses/:slug" element={<CourseDetail />} />
+          <Route
+            path="/courses"
+            element={
+              <ProtectedRoute>
+                <CourseList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:slug"
+            element={
+              <ProtectedRoute>
+                <CourseDetail />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/courses/:slug/modules/:moduleId"
             element={

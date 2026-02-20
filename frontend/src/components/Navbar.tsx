@@ -18,12 +18,11 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-6">
-          <Link to="/courses" className="text-gray-600 hover:text-gray-900">
-            Courses
-          </Link>
-
           {user ? (
             <>
+              <Link to="/courses" className="text-gray-600 hover:text-gray-900">
+                Courses
+              </Link>
               <Link
                 to="/dashboard"
                 className="text-gray-600 hover:text-gray-900"
