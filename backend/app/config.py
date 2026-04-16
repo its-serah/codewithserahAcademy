@@ -1,8 +1,15 @@
+import os
+
 from pydantic_settings import BaseSettings
+
+_default_db = os.environ.get(
+    "DATABASE_URL",
+    "postgresql://academy:academy_dev@localhost:5432/academy",
+)
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://academy:academy_dev@localhost:5432/academy"
+    DATABASE_URL: str = _default_db
     SECRET_KEY: str = "change-me-to-a-random-string"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_DAYS: int = 7
