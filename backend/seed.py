@@ -1,39 +1,60 @@
-"""Seed the database with an admin user, waitlist entries, and sample course data."""
+"""Seed the database with waitlist entries and sample course data."""
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from app.config import settings
 from app.database import SessionLocal
 from app.models import (
-    User,
     WaitlistEmail,
     Course,
     Module,
     ContentBlock,
 )
-from app.utils.auth import hash_password
 
 
 def seed():
     db = SessionLocal()
 
-    # Admin user
-    if not db.query(User).filter(User.email == settings.ADMIN_EMAIL).first():
-        db.add(
-            User(
-                email=settings.ADMIN_EMAIL,
-                hashed_password=hash_password(settings.ADMIN_PASSWORD),
-                name="Admin",
-                role="admin",
-            )
-        )
-        print(f"Created admin user: {settings.ADMIN_EMAIL}")
-
     # Waitlist emails
-    waitlist_emails = ["student@example.com", "learner@example.com", "test@example.com"]
+    waitlist_emails = [
+        "roumiyehhawraa@gmail.com",
+        "jamela.hallal45@gmail.com",
+        "jfestus94@gmail.com",
+        "hseinmwe1@gmail.com",
+        "batolzrk@gmail.com",
+        "chazaaboulhosn@gmail.com",
+        "20244306@std.neu.edu.tr",
+        "yanahanieh7@gmail.com",
+        "20233332@std.neu.edu.tr",
+        "oben07839@gmail.com",
+        "mahdi.khj98@gmail.com",
+        "Medory07@gmail.com",
+        "janahsen5@gmail.com",
+        "mahdialdakar@gmail.com",
+        "nabil_ahmad4@icloud.com",
+        "mohammadawad375@gmail.com",
+        "wehbetamara177@gmail.com",
+        "mhamad.yhya1@gmail.com",
+        "ranaalmaaz55@gmail.com",
+        "sedrakatlab10112006@gmail.com",
+        "Rozalinealjawhary@gmail.com",
+        "hiaj.gbk@gmail.com",
+        "alaa.allouch02@gmail.com",
+        "hisham.yassine@gmail.com",
+        "mariamhamid616@gmail.com",
+        "AliHussein.data@gmail.com",
+        "mernaashraf634@gmail.com",
+        "ucheokey24@gmail.com",
+        "mantach15@gmail.com",
+        "aliabouabbas2005@gmail.com",
+        "hijazibilal2002@gmail.com",
+        "hadihojeijwork@gmail.com",
+        "Rozaline203@gmail.com",
+        "ahmadmissalkhi@gmail.com",
+        "serah.elrashidi@gmail.com",
+    ]
     for email in waitlist_emails:
         if not db.query(WaitlistEmail).filter(WaitlistEmail.email == email).first():
             db.add(WaitlistEmail(email=email))
