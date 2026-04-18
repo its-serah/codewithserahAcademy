@@ -18,7 +18,7 @@ import AdminModuleEdit from "./pages/admin/AdminModuleEdit";
 export default function App() {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-cream">
         <Navbar />
         <Routes>
           <Route path="/" element={<Landing />} />
