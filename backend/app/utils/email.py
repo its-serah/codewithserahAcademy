@@ -102,8 +102,10 @@ async def _send(email: str, subject: str, html: str) -> None:
     try:
         await fm.send_message(message)
     except Exception as exc:
+        # Log but do not re-raise: email sending runs in BackgroundTasks and a
+        # raised exception would be swallowed silently by FastAPI, making it
+        # harder to diagnose than a logged error.
         logger.error("Failed to send email to %s: %s", email, exc, exc_info=True)
-        raise
 
 
 async def send_welcome_email(email: str, name: str) -> None:

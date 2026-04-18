@@ -176,8 +176,8 @@ def create_post(
     post = Post(
         user_id=current_user.id,
         course_id=req.course_id,
-        title=req.title,
-        body=req.body,
+        title=req.title.strip(),
+        body=req.body.strip(),
     )
     db.add(post)
     db.commit()
@@ -319,7 +319,7 @@ def create_comment(
     comment = Comment(
         post_id=post_id,
         user_id=current_user.id,
-        body=req.body,
+        body=req.body.strip(),
         parent_id=req.parent_id,
     )
     db.add(comment)

@@ -237,6 +237,9 @@ def verify_email(req: VerifyEmailRequest, db: Session = Depends(get_db)):
     return {"detail": "Email verified."}
 
 
+RESEND_COOLDOWN = timedelta(minutes=5)
+
+
 @router.post("/resend-verification", status_code=200)
 def resend_verification(
     background_tasks: BackgroundTasks,
@@ -246,6 +249,23 @@ def resend_verification(
     """Generate a fresh verification token and email it to the current user."""
     if current_user.is_verified:
         return {"detail": "Email already verified."}
+
+    # Rate-limit: block if a token was already sent within the cooldown window
+    recent = (
+        db.query(EmailVerificationToken)
+        .filter(
+            EmailVerificationToken.user_id == current_user.id,
+            EmailVerificationToken.used == False,  # noqa: E712
+            EmailVerificationToken.created_at
+            > datetime.now(timezone.utc) - RESEND_COOLDOWN,
+        )
+        .first()
+    )
+    if recent:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Please wait a few minutes before requesting another verification email.",
+        )
 
     evt = EmailVerificationToken(
         token=_generate_token(),
