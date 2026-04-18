@@ -9,6 +9,7 @@ import CourseList from "./pages/CourseList";
 import CourseDetail from "./pages/CourseDetail";
 import ModuleView from "./pages/ModuleView";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminWaitlist from "./pages/admin/AdminWaitlist";
 import AdminCourses from "./pages/admin/AdminCourses";
@@ -18,7 +19,7 @@ import AdminModuleEdit from "./pages/admin/AdminModuleEdit";
 export default function App() {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-cream">
+      <div className="min-h-screen bg-cream dark:bg-gray-900 transition-colors">
         <Navbar />
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -53,6 +54,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

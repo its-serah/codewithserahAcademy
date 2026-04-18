@@ -9,6 +9,17 @@ export const login = (email: string, password: string) =>
 
 export const getMe = () => api.get("/auth/me");
 
+export const updateProfile = (data: {
+  name: string;
+  username?: string | null;
+  certificate_name?: string | null;
+}) => api.patch("/auth/profile", data);
+
+export const changePassword = (
+  current_password: string,
+  new_password: string,
+) => api.post("/auth/change-password", { current_password, new_password });
+
 // Courses
 export const getCourses = () => api.get("/courses");
 export const getCourse = (slug: string) => api.get(`/courses/${slug}`);
