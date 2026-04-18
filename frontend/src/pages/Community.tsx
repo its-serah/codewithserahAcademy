@@ -97,11 +97,12 @@ export default function Community() {
   };
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-colors";
+    "w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors";
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
+    <div className="max-w-3xl mx-auto px-4 py-10">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Community
@@ -112,24 +113,73 @@ export default function Community() {
         </div>
         <button
           onClick={() => setShowForm((s) => !s)}
-          className="bg-brand text-white px-4 py-2 rounded-lg hover:bg-brand-dark transition-colors text-sm font-medium"
+          className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-brand-dark transition-all shadow-sm shadow-brand/20"
         >
-          {showForm ? "Cancel" : "Ask a Question"}
+          {showForm ? (
+            <>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              Cancel
+            </>
+          ) : (
+            <>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Ask a Question
+            </>
+          )}
         </button>
       </div>
 
+      {/* Create post form */}
       {showForm && (
         <form
           onSubmit={handleCreate}
-          className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 border-t-4 border-t-brand p-6 mb-6 space-y-4"
+          className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6 space-y-4"
         >
+          <h2 className="font-semibold text-gray-900 dark:text-white">
+            Start a discussion
+          </h2>
           {formError && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+              <svg
+                className="w-4 h-4 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
               {formError}
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
               Title
             </label>
             <input
@@ -143,20 +193,20 @@ export default function Community() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Body
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+              Details
             </label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               required
               rows={5}
-              className={inputClass}
+              className={`${inputClass} resize-none`}
               placeholder="Share the details..."
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
               Course (optional)
             </label>
             <select
@@ -175,25 +225,41 @@ export default function Community() {
           <button
             type="submit"
             disabled={submitting}
-            className="bg-brand text-white px-5 py-2.5 rounded-lg hover:bg-brand-dark disabled:opacity-50 transition-colors font-medium"
+            className="bg-brand text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-brand-dark disabled:opacity-50 transition-all shadow-sm shadow-brand/20"
           >
-            {submitting ? "Posting..." : "Post"}
+            {submitting ? "Posting…" : "Post Question"}
           </button>
         </form>
       )}
 
+      {/* Filters */}
       <div className="flex gap-3 mb-6 flex-wrap">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search posts..."
-          className={`${inputClass} flex-1 min-w-[200px]`}
-        />
+        <div className="relative flex-1 min-w-[200px]">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search posts…"
+            className={`${inputClass} pl-9`}
+          />
+        </div>
         <select
           value={courseFilter}
           onChange={(e) => setCourseFilter(e.target.value)}
-          className={`${inputClass} sm:w-60`}
+          className={`${inputClass} sm:w-52`}
         >
           <option value="">All courses</option>
           {courses.map((c) => (
@@ -204,28 +270,31 @@ export default function Community() {
         </select>
       </div>
 
+      {/* Posts */}
       {loading ? (
-        <div className="text-center text-gray-500 dark:text-gray-400 py-12">
-          Loading...
+        <div className="flex items-center justify-center py-16">
+          <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
         </div>
       ) : posts.length === 0 ? (
-        <div className="text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12">
-          <p className="text-gray-500 dark:text-gray-400">
-            No posts yet. Be the first to start a discussion.
+        <div className="text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-14">
+          <span className="text-4xl">💬</span>
+          <p className="mt-3 text-gray-500 dark:text-gray-400 font-medium">
+            No posts yet
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+            Be the first to start a discussion.
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {posts.map((post) => (
             <Link
               key={post.id}
               to={`/community/posts/${post.id}`}
-              className="block bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all"
+              className="block bg-white dark:bg-gray-800 px-5 py-4 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-brand/30 dark:hover:border-brand/30 hover:shadow-md transition-all duration-200 group"
             >
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
-                <span aria-hidden="true">
-                  {post.author.avatar_emoji ?? "👤"}
-                </span>
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <span>{post.author.avatar_emoji ?? "👤"}</span>
                 <span className="font-medium text-gray-700 dark:text-gray-300">
                   {post.author.username
                     ? `@${post.author.username}`
@@ -236,17 +305,19 @@ export default function Community() {
                 {post.course_title && (
                   <>
                     <span>·</span>
-                    <span className="text-brand">{post.course_title}</span>
+                    <span className="text-brand font-medium">
+                      {post.course_title}
+                    </span>
                   </>
                 )}
               </div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white group-hover:text-brand transition-colors mb-1.5">
                 {post.title}
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3 whitespace-pre-wrap">
+              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 whitespace-pre-wrap mb-3">
                 {post.body}
               </p>
-              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                 <span className="flex items-center gap-1">
                   <svg
                     className="w-3.5 h-3.5"

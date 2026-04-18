@@ -40,21 +40,29 @@ export default function Dashboard() {
 
   if (loading)
     return (
-      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-        Loading...
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     );
 
+  const avgProgress =
+    enrollments.length > 0
+      ? Math.round(
+          enrollments.reduce((s, e) => s + e.progress_percent, 0) /
+            enrollments.length,
+        )
+      : 0;
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      {/* Verification banner */}
       {user && !user.is_verified && (
-        <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-400 px-4 py-3 rounded-lg text-sm flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center justify-between gap-3 flex-wrap bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-400 px-4 py-3 rounded-xl text-sm">
           <div className="flex items-center gap-2">
             <svg
               className="w-4 h-4 flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
-              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"
@@ -62,75 +70,143 @@ export default function Dashboard() {
                 clipRule="evenodd"
               />
             </svg>
-            Please verify your email address. Check your inbox or
+            Please verify your email address. Check your inbox or{" "}
             <button
               onClick={handleResend}
               disabled={resending}
-              className="underline font-medium hover:text-amber-900 dark:hover:text-amber-300 disabled:opacity-60"
+              className="underline font-semibold hover:text-amber-900 dark:hover:text-amber-300 disabled:opacity-60"
             >
-              {resending ? "sending..." : "Resend verification email"}
+              {resending ? "sending…" : "resend"}
             </button>
           </div>
           {resendMsg && <span className="text-xs">{resendMsg}</span>}
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Welcome,{" "}
-          <span className="text-brand">
-            {user?.username ? `@${user.username}` : user?.name}
-          </span>
-        </h1>
-        <Link
-          to="/profile"
-          className="text-sm text-brand hover:underline flex items-center gap-1"
-        >
-          Edit profile →
-        </Link>
+      {/* Welcome card */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-brand to-brand-dark rounded-2xl p-7 text-white shadow-lg shadow-brand/20">
+        <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-8 -right-4 w-32 h-32 rounded-full bg-white/5" />
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <p className="text-white/70 text-sm font-medium mb-1">
+              Welcome back
+            </p>
+            <h1 className="text-2xl font-bold">
+              {user?.avatar_emoji && (
+                <span className="mr-2">{user.avatar_emoji}</span>
+              )}
+              {user?.username ? `@${user.username}` : user?.name}
+            </h1>
+          </div>
+          <div className="flex gap-6 text-center">
+            <div>
+              <p className="text-2xl font-bold">{enrollments.length}</p>
+              <p className="text-white/60 text-xs">Courses</p>
+            </div>
+            {enrollments.length > 0 && (
+              <div>
+                <p className="text-2xl font-bold">{avgProgress}%</p>
+                <p className="text-white/60 text-xs">Avg progress</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <p className="text-gray-500 dark:text-gray-400 mb-8">
-        Your enrolled courses
-      </p>
 
-      {enrollments.length === 0 ? (
-        <div className="mt-8 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12">
-          <p className="text-gray-500 dark:text-gray-400">
-            You haven't enrolled in any courses yet.
-          </p>
+      {/* Course list */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Your courses
+          </h2>
           <Link
             to="/courses"
-            className="mt-4 inline-block bg-brand text-white px-6 py-2.5 rounded-lg hover:bg-brand-dark transition-colors text-sm font-medium"
+            className="text-sm text-brand hover:underline font-medium"
           >
-            Browse courses
+            Browse more →
           </Link>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {enrollments.map((e) => (
+
+        {enrollments.length === 0 ? (
+          <div className="text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-14">
+            <span className="text-4xl">📚</span>
+            <p className="mt-3 text-gray-500 dark:text-gray-400 font-medium">
+              No courses yet
+            </p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1 mb-5">
+              Pick a course and start learning today.
+            </p>
             <Link
-              key={e.id}
-              to={`/courses/${e.course_slug}`}
-              className="block bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all"
+              to="/courses"
+              className="inline-block bg-brand text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brand-dark transition-colors shadow-sm shadow-brand/20"
             >
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {e.course_title}
-                </h2>
-                <span className="text-sm font-medium text-brand">
-                  {Math.round(e.progress_percent)}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-brand h-2 rounded-full transition-all"
-                  style={{ width: `${e.progress_percent}%` }}
-                />
-              </div>
+              Browse courses
             </Link>
-          ))}
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {enrollments.map((e) => (
+              <Link
+                key={e.id}
+                to={`/courses/${e.course_slug}`}
+                className="flex items-center gap-5 bg-white dark:bg-gray-800 px-5 py-4 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-brand/30 dark:hover:border-brand/30 hover:shadow-md transition-all duration-200 group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-brand-light dark:bg-brand/20 flex items-center justify-center text-brand font-bold text-lg flex-shrink-0">
+                  {e.course_title[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-brand transition-colors">
+                    {e.course_title}
+                  </p>
+                  <div className="mt-1.5 flex items-center gap-3">
+                    <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-brand rounded-full transition-all"
+                        style={{ width: `${e.progress_percent}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-semibold text-brand flex-shrink-0">
+                      {Math.round(e.progress_percent)}%
+                    </span>
+                  </div>
+                </div>
+                <svg
+                  className="w-4 h-4 text-gray-400 group-hover:text-brand transition-colors flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Quick links */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {[
+          { to: "/community", icon: "🤝", label: "Community" },
+          { to: "/profile", icon: "✏️", label: "Edit Profile" },
+          { to: "/courses", icon: "📚", label: "All Courses" },
+        ].map((item) => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className="flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-brand/30 hover:text-brand dark:hover:text-brand transition-all duration-200"
+          >
+            <span className="text-lg">{item.icon}</span>
+            {item.label}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

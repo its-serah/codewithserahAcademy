@@ -5,6 +5,13 @@ import { useAuth } from "../contexts/AuthContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const perks = [
+  "Video lessons for every concept",
+  "Track your progress module by module",
+  "Unlock your certificate on completion",
+  "Ask questions in the student community",
+];
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,14 +22,10 @@ export default function Login() {
   const { setToken } = useAuth();
   const navigate = useNavigate();
 
-  const validateEmail = (value: string) => {
-    if (!value) return "Email is required";
-    if (!EMAIL_REGEX.test(value)) return "Please enter a valid email address";
+  const validateEmail = (v: string) => {
+    if (!v) return "Email is required";
+    if (!EMAIL_REGEX.test(v)) return "Please enter a valid email address";
     return "";
-  };
-
-  const handleEmailBlur = () => {
-    setEmailError(validateEmail(email));
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -45,9 +48,7 @@ export default function Login() {
       setToken(res.data.access_token);
       navigate("/dashboard");
     } catch (err: any) {
-      const msg = err.response?.data?.detail || "Login failed";
-      setError(msg);
-      // Highlight both fields on credential error
+      setError(err.response?.data?.detail || "Login failed");
       setEmailError(" ");
       setPasswordError(" ");
     } finally {
@@ -55,25 +56,72 @@ export default function Login() {
     }
   };
 
-  const inputClass = (hasError: boolean) =>
-    `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
-      hasError
-        ? "border-red-400 focus:ring-red-300 bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-300"
-        : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-brand/40 focus:border-brand"
+  const inputCls = (hasErr: boolean) =>
+    `w-full px-4 py-2.5 rounded-xl border text-sm transition-colors focus:outline-none focus:ring-2 ${
+      hasErr
+        ? "border-red-400 focus:ring-red-200 bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-300"
+        : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-brand/30 focus:border-brand"
     }`;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 bg-cream dark:bg-gray-900">
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-8 text-brand dark:text-white">
-          Sign In
-        </h1>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md border-t-4 border-brand space-y-5"
-        >
+    <div className="min-h-[calc(100vh-4rem)] flex">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-brand to-brand-dark flex-col justify-between p-12 text-white">
+        <div />
+        <div>
+          <h2 className="text-3xl font-bold leading-snug mb-3">
+            Welcome back to
+            <br />
+            the academy 👋
+          </h2>
+          <p className="text-white/70 text-sm mb-8">
+            Pick up right where you left off.
+          </p>
+          <ul className="space-y-3">
+            {perks.map((p) => (
+              <li
+                key={p}
+                className="flex items-center gap-3 text-sm text-white/85"
+              >
+                <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </span>
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="text-white/40 text-xs">© CodewithSerah Academy</p>
+      </div>
+
+      {/* Right panel – form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-cream dark:bg-gray-900">
+        <div className="w-full max-w-sm">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+            Sign in
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-7">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-brand font-medium hover:underline"
+            >
+              Register
+            </Link>
+          </p>
+
           {error && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="mb-4 flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
               <svg
                 className="w-4 h-4 flex-shrink-0"
                 fill="currentColor"
@@ -89,105 +137,102 @@ export default function Login() {
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Email
-            </label>
-            <div className="relative">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (emailError) setEmailError(validateEmail(e.target.value));
-                }}
-                onBlur={handleEmailBlur}
-                required
-                className={inputClass(!!emailError.trim())}
-              />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                Email
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailError)
+                      setEmailError(validateEmail(e.target.value));
+                  }}
+                  onBlur={() => setEmailError(validateEmail(email))}
+                  required
+                  className={inputCls(!!emailError.trim())}
+                />
+                {emailError.trim() && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400">
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                )}
+              </div>
               {emailError.trim() && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                  {emailError}
+                </p>
               )}
             </div>
-            {emailError.trim() && (
-              <p className="mt-1 text-xs text-red-600">{emailError}</p>
-            )}
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (passwordError) setPasswordError("");
-                }}
-                required
-                className={inputClass(!!passwordError.trim())}
-              />
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-brand hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) setPasswordError("");
+                  }}
+                  required
+                  className={inputCls(!!passwordError.trim())}
+                />
+                {passwordError.trim() && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400">
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                )}
+              </div>
               {passwordError.trim() && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                  {passwordError}
+                </p>
               )}
             </div>
-            {passwordError.trim() && (
-              <p className="mt-1 text-xs text-red-600">{passwordError}</p>
-            )}
-          </div>
 
-          <div className="text-right -mt-2">
-            <Link
-              to="/forgot-password"
-              className="text-sm text-brand hover:underline"
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-brand text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-brand-dark disabled:opacity-50 shadow-sm shadow-brand/20 hover:shadow-md hover:shadow-brand/25 transition-all duration-200 mt-2"
             >
-              Forgot password?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-brand text-white py-2.5 rounded-lg hover:bg-brand-dark disabled:opacity-50 transition-colors font-medium"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="text-brand hover:underline font-medium"
-            >
-              Register
-            </Link>
-          </p>
-        </form>
+              {loading ? "Signing in…" : "Sign In"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

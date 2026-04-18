@@ -8,4 +8,35 @@
   --color-brand-dark: #5a2578;
   --color-brand-light: #f3e8ff;
   --color-cream: #fffaf0;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: #6f309625;
+  color: #6f3096;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #6f309635;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6f309680;
 }

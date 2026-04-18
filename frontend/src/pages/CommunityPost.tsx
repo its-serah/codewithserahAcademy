@@ -47,7 +47,6 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString();
 }
 
-// Build a nested tree from a flat comments list using parent_id.
 function buildTree(flat: Comment[]): Comment[] {
   const byId = new Map<number, Comment>();
   flat.forEach((c) => byId.set(c.id, { ...c, replies: [] }));
@@ -96,7 +95,6 @@ export default function CommunityPost() {
 
   const handleLike = async () => {
     if (!post) return;
-    // optimistic toggle
     setPost({
       ...post,
       liked_by_me: !post.liked_by_me,
@@ -137,10 +135,7 @@ export default function CommunityPost() {
     if (!replyBody.trim()) return;
     setSubmitting(true);
     try {
-      await addComment(postId, {
-        body: replyBody.trim(),
-        parent_id: parentId,
-      });
+      await addComment(postId, { body: replyBody.trim(), parent_id: parentId });
       setReplyBody("");
       setReplyingTo(null);
       await load();
@@ -160,12 +155,12 @@ export default function CommunityPost() {
   };
 
   const inputClass =
-    "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-colors";
+    "w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors";
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-        Loading...
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -173,10 +168,26 @@ export default function CommunityPost() {
   if (error || !post) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <Link to="/community" className="text-sm text-brand hover:underline">
-          ← Back to community
+        <Link
+          to="/community"
+          className="inline-flex items-center gap-1 text-sm text-brand hover:underline mb-4"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Back to community
         </Link>
-        <div className="mt-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
           {error || "Post not found"}
         </div>
       </div>
@@ -194,11 +205,9 @@ export default function CommunityPost() {
         className={depth > 0 ? "ml-6 pl-4 border-l-2 border-brand/20" : ""}
       >
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-3">
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
-            <span aria-hidden="true">
-              {comment.author.avatar_emoji ?? "👤"}
-            </span>
-            <span className="font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
+            <span>{comment.author.avatar_emoji ?? "👤"}</span>
+            <span className="font-semibold text-gray-700 dark:text-gray-300">
               {comment.author.username
                 ? `@${comment.author.username}`
                 : comment.author.name}
@@ -206,16 +215,16 @@ export default function CommunityPost() {
             <span>·</span>
             <span>{timeAgo(comment.created_at)}</span>
           </div>
-          <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap mb-3">
+          <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap mb-3 leading-relaxed">
             {comment.body}
           </p>
           <div className="flex items-center gap-3 text-xs">
-            {depth === 0 && (
+            {depth === 0 && user && (
               <button
                 onClick={() =>
                   setReplyingTo(replyingTo === comment.id ? null : comment.id)
                 }
-                className="text-brand hover:underline"
+                className="text-brand hover:underline font-medium"
               >
                 {replyingTo === comment.id ? "Cancel" : "Reply"}
               </button>
@@ -223,7 +232,7 @@ export default function CommunityPost() {
             {isOwn && (
               <button
                 onClick={() => handleDeleteComment(comment.id)}
-                className="text-red-500 hover:text-red-700"
+                className="text-red-400 hover:text-red-600 transition-colors"
               >
                 Delete
               </button>
@@ -243,40 +252,51 @@ export default function CommunityPost() {
                 onChange={(e) => setReplyBody(e.target.value)}
                 rows={2}
                 required
-                placeholder="Write a reply..."
-                className={inputClass}
+                placeholder="Write a reply…"
+                className={`${inputClass} resize-none`}
               />
               <button
                 type="submit"
                 disabled={submitting}
-                className="bg-brand text-white px-4 py-1.5 rounded-lg text-sm hover:bg-brand-dark disabled:opacity-50 transition-colors font-medium"
+                className="bg-brand text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-brand-dark disabled:opacity-50 transition-colors"
               >
-                {submitting ? "Posting..." : "Reply"}
+                {submitting ? "Posting…" : "Post Reply"}
               </button>
             </form>
           )}
         </div>
-
         {comment.replies?.map((r) => renderComment(r, depth + 1))}
       </div>
     );
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-10">
       <Link
         to="/community"
-        className="text-sm text-brand hover:underline inline-block mb-4"
+        className="inline-flex items-center gap-1 text-sm text-brand hover:underline mb-6"
       >
-        ← Back to community
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+        Back to community
       </Link>
 
-      <article className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 border-t-4 border-t-brand p-6 mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
-          <span className="text-lg" aria-hidden="true">
-            {post.author.avatar_emoji ?? "👤"}
-          </span>
-          <span className="font-medium text-gray-700 dark:text-gray-300">
+      {/* Post */}
+      <article className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
+          <span className="text-base">{post.author.avatar_emoji ?? "👤"}</span>
+          <span className="font-semibold text-gray-700 dark:text-gray-300">
             {post.author.username
               ? `@${post.author.username}`
               : post.author.name}
@@ -286,26 +306,32 @@ export default function CommunityPost() {
           {post.course_title && (
             <>
               <span>·</span>
-              <span className="text-brand">{post.course_title}</span>
+              <span className="text-brand font-medium">
+                {post.course_title}
+              </span>
             </>
           )}
         </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
           {post.title}
         </h1>
-        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap mb-5">
+        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed mb-5">
           {post.body}
         </p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
           <button
             onClick={handleLike}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-sm font-semibold transition-all ${
               post.liked_by_me
-                ? "bg-brand text-white border-brand"
-                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-brand hover:text-brand"
+                ? "bg-brand text-white border-brand shadow-sm shadow-brand/20"
+                : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-brand hover:text-brand"
             }`}
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              className="w-3.5 h-3.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path
                 fillRule="evenodd"
                 d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
@@ -317,45 +343,49 @@ export default function CommunityPost() {
           {isOwnPost && (
             <button
               onClick={handleDeletePost}
-              className="px-3 py-1.5 text-sm text-red-500 hover:text-red-700"
+              className="text-sm text-red-400 hover:text-red-600 transition-colors px-1"
             >
-              Delete
+              Delete post
             </button>
           )}
         </div>
       </article>
 
-      <section className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          Join the discussion
-        </h2>
-        <form onSubmit={handleAddComment} className="space-y-3">
-          <textarea
-            value={commentBody}
-            onChange={(e) => setCommentBody(e.target.value)}
-            rows={3}
-            required
-            placeholder="Share your thoughts..."
-            className={inputClass}
-          />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="bg-brand text-white px-5 py-2 rounded-lg hover:bg-brand-dark disabled:opacity-50 transition-colors font-medium"
-          >
-            {submitting ? "Posting..." : "Post Comment"}
-          </button>
-        </form>
-      </section>
+      {/* Add comment */}
+      {user && (
+        <section className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-3">
+            Join the discussion
+          </h2>
+          <form onSubmit={handleAddComment} className="space-y-3">
+            <textarea
+              value={commentBody}
+              onChange={(e) => setCommentBody(e.target.value)}
+              rows={3}
+              required
+              placeholder="Share your thoughts…"
+              className={`${inputClass} resize-none`}
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              className="bg-brand text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brand-dark disabled:opacity-50 transition-all shadow-sm shadow-brand/20"
+            >
+              {submitting ? "Posting…" : "Post Comment"}
+            </button>
+          </form>
+        </section>
+      )}
 
+      {/* Comments */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
           {post.comments.length}{" "}
           {post.comments.length === 1 ? "Comment" : "Comments"}
         </h2>
         {tree.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            No comments yet.
+          <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-8">
+            No comments yet. Be the first to reply.
           </p>
         ) : (
           tree.map((c) => renderComment(c))
