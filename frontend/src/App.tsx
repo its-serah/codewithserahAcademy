@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Navbar from "./components/Navbar";
+import NotFound from "./pages/NotFound";
 import ProtectedRoute, { AdminRoute } from "./components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -129,6 +130,7 @@ export default function App() {
               </AdminRoute>
             }
           />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </ErrorBoundary>
