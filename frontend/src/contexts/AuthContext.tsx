@@ -15,6 +15,8 @@ interface User {
   certificate_name: string | null;
   role: string;
   is_active: boolean;
+  is_verified: boolean;
+  avatar_emoji: string | null;
 }
 
 interface AuthContextType {

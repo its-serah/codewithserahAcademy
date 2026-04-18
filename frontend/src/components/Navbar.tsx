@@ -72,6 +72,12 @@ export default function Navbar() {
               >
                 Dashboard
               </Link>
+              <Link
+                to="/community"
+                className="text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand transition-colors"
+              >
+                Community
+              </Link>
               {user.role === "admin" && (
                 <Link
                   to="/admin"
@@ -82,8 +88,9 @@ export default function Navbar() {
               )}
               <Link
                 to="/profile"
-                className="text-sm text-gray-500 dark:text-gray-400 hover:text-brand dark:hover:text-brand transition-colors"
+                className="text-sm text-gray-500 dark:text-gray-400 hover:text-brand dark:hover:text-brand transition-colors flex items-center gap-1.5"
               >
+                <span aria-hidden="true">{user.avatar_emoji ?? "👤"}</span>
                 {user.username ? `@${user.username}` : user.name}
               </Link>
               <button

@@ -13,7 +13,46 @@ export const updateProfile = (data: {
   name: string;
   username?: string | null;
   certificate_name?: string | null;
+  avatar_emoji?: string | null;
 }) => api.patch("/auth/profile", data);
+
+export const forgotPassword = (email: string) =>
+  api.post("/auth/forgot-password", { email });
+
+export const resetPassword = (token: string, new_password: string) =>
+  api.post("/auth/reset-password", { token, new_password });
+
+export const verifyEmail = (token: string) =>
+  api.post("/auth/verify-email", { token });
+
+export const resendVerification = () => api.post("/auth/resend-verification");
+
+// Community
+export const getPosts = (params?: {
+  course_id?: number;
+  search?: string;
+  skip?: number;
+}) => api.get("/community/posts", { params });
+
+export const getPost = (id: number) => api.get(`/community/posts/${id}`);
+
+export const createPost = (data: {
+  title: string;
+  body: string;
+  course_id?: number | null;
+}) => api.post("/community/posts", data);
+
+export const deletePost = (id: number) => api.delete(`/community/posts/${id}`);
+
+export const likePost = (id: number) => api.post(`/community/posts/${id}/like`);
+
+export const addComment = (
+  postId: number,
+  data: { body: string; parent_id?: number | null },
+) => api.post(`/community/posts/${postId}/comments`, data);
+
+export const deleteComment = (id: number) =>
+  api.delete(`/community/comments/${id}`);
 
 export const changePassword = (
   current_password: string,

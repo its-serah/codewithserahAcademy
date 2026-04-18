@@ -12,6 +12,8 @@ class Course(Base):
     description = Column(Text)
     thumbnail_url = Column(String)
     is_published = Column(Boolean, default=False)
+    difficulty = Column(String, nullable=True)
+    category = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     modules = relationship(

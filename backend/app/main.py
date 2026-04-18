@@ -5,7 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import settings
-from app.routers import auth, courses, modules, enrollments, progress, admin
+from app.routers import (
+    auth,
+    courses,
+    modules,
+    enrollments,
+    progress,
+    admin,
+    community,
+)
 
 logger = logging.getLogger("academy")
 
@@ -25,6 +33,7 @@ app.include_router(modules.router)
 app.include_router(enrollments.router)
 app.include_router(progress.router)
 app.include_router(admin.router)
+app.include_router(community.router)
 
 
 @app.exception_handler(Exception)

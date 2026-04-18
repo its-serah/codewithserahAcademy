@@ -178,6 +178,10 @@ export default function Register() {
           <p className="text-center text-sm text-gray-500">
             Only waitlisted emails can register.
           </p>
+          <p className="text-center text-xs text-gray-500">
+            You'll receive a welcome email and verification link after
+            registering.
+          </p>
           <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link

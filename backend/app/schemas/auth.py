@@ -26,6 +26,8 @@ class UserResponse(BaseModel):
     certificate_name: Optional[str] = None
     role: str
     is_active: bool
+    is_verified: bool = False
+    avatar_emoji: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -34,8 +36,22 @@ class UpdateProfileRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     username: Optional[str] = Field(default=None, min_length=3, max_length=50)
     certificate_name: Optional[str] = Field(default=None, max_length=255)
+    avatar_emoji: Optional[str] = None
 
 
 class ChangePasswordRequest(BaseModel):
     current_password: str = Field(min_length=1)
     new_password: str = Field(min_length=6, max_length=128)
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(min_length=6, max_length=128)
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str

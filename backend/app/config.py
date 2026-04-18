@@ -15,6 +15,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_DAYS: int = 7
     CORS_ORIGINS: str = "https://codewithserahacademy.vercel.app"
 
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = "noreply@codewithserah.com"
+    MAIL_FROM_NAME: str = "CodewithSerah Academy"
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_PORT: int = 587
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    FRONTEND_URL: str = "https://codewithserahacademy.vercel.app"
+
     model_config = {"env_file": ".env"}
 
     @property

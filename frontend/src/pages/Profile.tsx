@@ -3,27 +3,58 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { updateProfile, changePassword } from "../api/endpoints";
 
+const EMOJIS = [
+  { emoji: "🦁", title: "The Leader" },
+  { emoji: "🦊", title: "The Thinker" },
+  { emoji: "🐬", title: "The Explorer" },
+  { emoji: "🦋", title: "The Creative" },
+  { emoji: "🐉", title: "The Achiever" },
+  { emoji: "🌙", title: "The Dreamer" },
+  { emoji: "⚡", title: "The Energizer" },
+  { emoji: "🎯", title: "The Focused" },
+  { emoji: "🌊", title: "The Go-Getter" },
+  { emoji: "🔥", title: "The Passionate" },
+  { emoji: "🌸", title: "The Gentle Soul" },
+  { emoji: "🎭", title: "The Expressive" },
+  { emoji: "🦉", title: "The Wise One" },
+  { emoji: "🚀", title: "The Innovator" },
+  { emoji: "💎", title: "The Gem" },
+  { emoji: "🌈", title: "The Optimist" },
+  { emoji: "🐻", title: "The Loyal" },
+  { emoji: "🦅", title: "The Free Spirit" },
+  { emoji: "🌺", title: "The Nurturer" },
+  { emoji: "🎸", title: "The Rebel" },
+  { emoji: "🏆", title: "The Champion" },
+  { emoji: "🌟", title: "The Star" },
+  { emoji: "🐙", title: "The Problem Solver" },
+  { emoji: "🦚", title: "The Perfectionist" },
+  { emoji: "🐺", title: "The Lone Wolf" },
+];
+
 export default function Profile() {
   const { user, refreshUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
-  // Profile fields
   const [name, setName] = useState(user?.name ?? "");
   const [username, setUsername] = useState(user?.username ?? "");
   const [certificateName, setCertificateName] = useState(
     user?.certificate_name ?? "",
   );
+  const [avatarEmoji, setAvatarEmoji] = useState<string | null>(
+    user?.avatar_emoji ?? null,
+  );
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
 
-  // Password fields
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const selectedPersonality = EMOJIS.find((e) => e.emoji === avatarEmoji);
 
   const handleProfileSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -39,6 +70,7 @@ export default function Profile() {
         name: name.trim(),
         username: username.trim() || null,
         certificate_name: certificateName.trim() || null,
+        avatar_emoji: avatarEmoji,
       });
       await refreshUser();
       setProfileSuccess("Profile updated successfully!");
@@ -96,64 +128,68 @@ export default function Profile() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">
           Profile Information
         </h2>
-        <form onSubmit={handleProfileSave} className="space-y-4">
+        <form onSubmit={handleProfileSave} className="space-y-5">
           {profileError && (
-            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
-              <svg
-                className="w-4 h-4 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
               {profileError}
             </div>
           )}
           {profileSuccess && (
-            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
-              <svg
-                className="w-4 h-4 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
               {profileSuccess}
             </div>
           )}
 
+          {/* Avatar Emoji Picker */}
+          <div>
+            <label className={labelClass}>Your Avatar</label>
+
+            <div className="flex flex-col items-center py-4">
+              <div className="w-20 h-20 rounded-full bg-brand-light dark:bg-brand/20 flex items-center justify-center text-4xl border-2 border-brand/30">
+                {avatarEmoji ?? (
+                  <span className="text-gray-400 dark:text-gray-500">?</span>
+                )}
+              </div>
+              <p className="mt-2 text-sm font-medium text-brand">
+                {selectedPersonality?.title ?? "Pick your personality"}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto p-1">
+              {EMOJIS.map((item) => {
+                const selected = item.emoji === avatarEmoji;
+                return (
+                  <button
+                    key={item.emoji}
+                    type="button"
+                    onClick={() => setAvatarEmoji(selected ? null : item.emoji)}
+                    className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
+                      selected
+                        ? "ring-2 ring-brand bg-brand-light dark:bg-brand/20 border-brand"
+                        : "border-gray-200 dark:border-gray-700 hover:border-brand/40 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    }`}
+                    aria-pressed={selected}
+                    aria-label={item.title}
+                  >
+                    <span className="text-2xl leading-none">{item.emoji}</span>
+                    <span className="text-[10px] mt-1 text-gray-600 dark:text-gray-400 text-center leading-tight">
+                      {item.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Email — locked */}
           <div>
             <label className={labelClass}>Email</label>
-            <div className="relative">
-              <input
-                type="email"
-                value={user?.email ?? ""}
-                disabled
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-500 cursor-not-allowed pr-10"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </span>
-            </div>
+            <input
+              type="email"
+              value={user?.email ?? ""}
+              disabled
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+            />
             <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
               Email cannot be changed
             </p>
@@ -205,7 +241,6 @@ export default function Profile() {
               className={inputClass}
               placeholder="Your full legal name"
             />
-            {/* Live preview */}
             <div className="mt-2 px-4 py-3 bg-cream dark:bg-gray-900 border border-dashed border-brand/40 rounded-lg text-sm text-gray-600 dark:text-gray-400">
               <span className="text-xs font-medium text-brand uppercase tracking-wide block mb-1">
                 Certificate Preview
@@ -268,34 +303,12 @@ export default function Profile() {
         </h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           {passwordError && (
-            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
-              <svg
-                className="w-4 h-4 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
               {passwordError}
             </div>
           )}
           {passwordSuccess && (
-            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
-              <svg
-                className="w-4 h-4 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
               {passwordSuccess}
             </div>
           )}

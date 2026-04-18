@@ -13,4 +13,6 @@ class User(Base):
     certificate_name = Column(String, nullable=True)
     role = Column(String, nullable=False, default="student")
     is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False, nullable=False, server_default="false")
+    avatar_emoji = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

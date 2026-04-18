@@ -1,4 +1,7 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies import get_db
@@ -9,15 +12,30 @@ router = APIRouter(prefix="/api/courses", tags=["courses"])
 
 
 @router.get("", response_model=list[CourseListItem])
-def list_courses(db: Session = Depends(get_db)):
-    """List all published courses."""
-    courses = (
+def list_courses(
+    search: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    category: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    """List all published courses. Supports search, difficulty, and category filters."""
+    q = (
         db.query(Course)
         .options(joinedload(Course.modules))
-        .filter(Course.is_published == True)
-        .order_by(Course.created_at.desc())
-        .all()
+        .filter(Course.is_published == True)  # noqa: E712
     )
+
+    if search:
+        pattern = f"%{search}%"
+        q = q.filter(
+            or_(Course.title.ilike(pattern), Course.description.ilike(pattern))
+        )
+    if difficulty:
+        q = q.filter(Course.difficulty == difficulty)
+    if category:
+        q = q.filter(Course.category == category)
+
+    courses = q.order_by(Course.created_at.desc()).all()
     return [
         CourseListItem(
             id=c.id,
@@ -39,7 +57,7 @@ def get_course(slug: str, db: Session = Depends(get_db)):
     course = (
         db.query(Course)
         .options(joinedload(Course.modules))
-        .filter(Course.slug == slug, Course.is_published == True)
+        .filter(Course.slug == slug, Course.is_published == True)  # noqa: E712
         .first()
     )
     if not course:

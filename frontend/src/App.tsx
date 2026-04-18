@@ -10,6 +10,11 @@ import CourseDetail from "./pages/CourseDetail";
 import ModuleView from "./pages/ModuleView";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import Community from "./pages/Community";
+import CommunityPost from "./pages/CommunityPost";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminWaitlist from "./pages/admin/AdminWaitlist";
 import AdminCourses from "./pages/admin/AdminCourses";
@@ -25,6 +30,25 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route
+            path="/community"
+            element={
+              <ProtectedRoute>
+                <Community />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community/posts/:id"
+            element={
+              <ProtectedRoute>
+                <CommunityPost />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/courses"
             element={
