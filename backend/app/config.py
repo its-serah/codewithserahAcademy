@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "change-me-to-a-random-string"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_DAYS: int = 7
-    CORS_ORIGINS: str = "https://codewithserahacademy.vercel.app/"
+    CORS_ORIGINS: str = "https://codewithserahacademy.vercel.app"
 
     model_config = {"env_file": ".env"}
 
