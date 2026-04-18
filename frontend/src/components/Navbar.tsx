@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import logo from "../assets/logocodewithserahoct.png";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -28,22 +29,10 @@ export default function Navbar() {
           onClick={close}
         >
           <img
-            src="/logo.png"
-            alt="CodewithSerah"
+            src={logo}
+            alt="CodewithSerah Academy"
             className="h-9 w-auto object-contain"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              const placeholder = e.currentTarget
-                .nextElementSibling as HTMLElement;
-              if (placeholder) placeholder.style.display = "flex";
-            }}
           />
-          <div
-            className="hidden h-9 w-32 bg-brand rounded-xl items-center justify-center text-white text-xs font-bold tracking-widest uppercase"
-            style={{ display: "none" }}
-          >
-            YOUR LOGO
-          </div>
         </Link>
 
         {/* Desktop nav */}

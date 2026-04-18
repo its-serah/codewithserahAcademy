@@ -1,9 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Navbar from "./components/Navbar";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute, { AdminRoute } from "./components/ProtectedRoute";
-import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CourseList from "./pages/CourseList";
@@ -28,7 +27,7 @@ export default function App() {
       <div className="min-h-screen bg-cream dark:bg-gray-900 transition-colors">
         <Navbar />
         <Routes>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
