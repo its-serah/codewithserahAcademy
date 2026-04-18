@@ -5,7 +5,7 @@ export default function Landing() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-cream px-4">
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-cream dark:bg-gray-900 px-4">
       <h1 className="text-5xl font-bold text-gray-900 text-center">
         Learn to Code with <span className="text-brand">Serah</span>
       </h1>

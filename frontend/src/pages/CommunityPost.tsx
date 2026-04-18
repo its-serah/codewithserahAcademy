@@ -299,13 +299,20 @@ export default function CommunityPost() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleLike}
-            className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
               post.liked_by_me
                 ? "bg-brand text-white border-brand"
-                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-brand"
+                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-brand hover:text-brand"
             }`}
           >
-            ♥ {post.like_count}
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                clipRule="evenodd"
+              />
+            </svg>
+            {post.like_count}
           </button>
           {isOwnPost && (
             <button
