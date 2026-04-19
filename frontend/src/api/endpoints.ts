@@ -111,6 +111,18 @@ export const adminDeleteModule = (id: number) =>
 export const adminReorderModules = (module_ids: number[]) =>
   api.post("/admin/modules/reorder", { module_ids });
 
+// Feedback
+export const submitFeedback = (
+  moduleId: number,
+  data: { rating: number; comment?: string },
+) => api.post(`/modules/${moduleId}/feedback`, data);
+export const getMyFeedback = (moduleId: number) =>
+  api.get(`/modules/${moduleId}/feedback/mine`);
+
+// Admin - Feedback
+export const adminGetModuleFeedback = (moduleId: number) =>
+  api.get(`/admin/modules/${moduleId}/feedback`);
+
 // Admin - Content Blocks
 export const adminCreateBlock = (data: {
   module_id: number;

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../api/endpoints";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -21,6 +22,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { setToken } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const validateEmail = (v: string) => {
     if (!v) return "Email is required";
@@ -46,6 +48,7 @@ export default function Login() {
     try {
       const res = await login(email, password);
       setToken(res.data.access_token);
+      showToast("Welcome back!");
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Login failed");
@@ -72,10 +75,10 @@ export default function Login() {
           <h2 className="text-3xl font-bold leading-snug mb-3">
             Welcome back to
             <br />
-            the academy 👋
+            the academy
           </h2>
           <p className="text-white/70 text-sm mb-8">
-            Pick up right where you left off.
+            Continue where you left off.
           </p>
           <ul className="space-y-3">
             {perks.map((p) => (

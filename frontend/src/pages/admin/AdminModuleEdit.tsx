@@ -6,6 +6,7 @@ import {
   adminCreateBlock,
   adminUpdateBlock,
   adminDeleteBlock,
+  adminGetModuleFeedback,
 } from "../../api/endpoints";
 
 interface ContentBlock {
@@ -15,6 +16,14 @@ interface ContentBlock {
   order_index: number;
   markdown_content: string | null;
   youtube_video_id: string | null;
+}
+
+interface Feedback {
+  id: number;
+  user_name: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
 }
 
 interface ModuleData {
@@ -48,6 +57,8 @@ export default function AdminModuleEdit() {
   const [addingBlock, setAddingBlock] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [feedbackLoadError, setFeedbackLoadError] = useState(false);
 
   const load = () => {
     if (!moduleId) return;
@@ -58,6 +69,9 @@ export default function AdminModuleEdit() {
         setModuleDesc(res.data.description || "");
       })
       .finally(() => setLoading(false));
+    adminGetModuleFeedback(Number(moduleId))
+      .then((res) => setFeedback(res.data))
+      .catch(() => setFeedbackLoadError(true));
   };
 
   useEffect(() => {
@@ -442,6 +456,96 @@ export default function AdminModuleEdit() {
             </button>
           </form>
         </div>
+      </section>
+      {/* Student feedback */}
+      <section className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-semibold text-gray-900 dark:text-white">
+            Student Feedback
+          </h2>
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            {feedback.length} {feedback.length === 1 ? "response" : "responses"}
+          </span>
+        </div>
+
+        {feedbackLoadError ? (
+          <p className="text-sm text-red-500 dark:text-red-400 text-center py-6">
+            Failed to load feedback.
+          </p>
+        ) : feedback.length === 0 ? (
+          <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">
+            No feedback yet.
+          </p>
+        ) : (
+          <>
+            {/* Average rating */}
+            <div className="flex items-center gap-3 mb-5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                {(
+                  feedback.reduce((s, f) => s + f.rating, 0) / feedback.length
+                ).toFixed(1)}
+              </span>
+              <div>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <svg
+                      key={s}
+                      className={`w-4 h-4 ${
+                        s <=
+                        Math.round(
+                          feedback.reduce((a, f) => a + f.rating, 0) /
+                            feedback.length,
+                        )
+                          ? "text-yellow-400"
+                          : "text-gray-200 dark:text-gray-600"
+                      }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.063 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  average from {feedback.length}{" "}
+                  {feedback.length === 1 ? "student" : "students"}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {feedback.map((fb) => (
+                <div
+                  key={fb.id}
+                  className="rounded-xl border border-gray-100 dark:border-gray-700 px-4 py-3"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      {fb.user_name}
+                    </span>
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <svg
+                          key={s}
+                          className={`w-3.5 h-3.5 ${s <= fb.rating ? "text-yellow-400" : "text-gray-200 dark:text-gray-600"}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.063 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" />
+                        </svg>
+                      ))}
+                    </div>
+                  </div>
+                  {fb.comment && (
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      {fb.comment}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

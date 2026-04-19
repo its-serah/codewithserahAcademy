@@ -2,11 +2,12 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../api/endpoints";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const perks = [
-  "Waitlist-only access — you're invited",
+  "Waitlist access only",
   "Video lessons at your own pace",
   "Progressive module unlocking",
   "Certificate on course completion",
@@ -24,6 +25,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const { setToken } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const validateEmail = (v: string) => {
     if (!v) return "Email is required";
@@ -51,6 +53,7 @@ export default function Register() {
     try {
       const res = await register(email, password, name);
       setToken(res.data.access_token);
+      showToast(`Welcome, ${name.trim()}! Your account is ready.`);
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Registration failed");
@@ -85,12 +88,12 @@ export default function Register() {
         <div />
         <div>
           <h2 className="text-3xl font-bold leading-snug mb-3">
-            Start your journey
+            Start learning
             <br />
-            today 🚀
+            with Serah
           </h2>
           <p className="text-white/70 text-sm mb-8">
-            Join the waitlist community and start learning.
+            Create your account and get started.
           </p>
           <ul className="space-y-3">
             {perks.map((p) => (

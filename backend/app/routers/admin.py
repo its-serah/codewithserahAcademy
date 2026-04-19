@@ -9,8 +9,10 @@ from app.models.waitlist import WaitlistEmail
 from app.models.course import Course
 from app.models.module import Module
 from app.models.content_block import ContentBlock
+from app.models.feedback import ModuleFeedback
 from app.schemas.waitlist import WaitlistAdd, WaitlistOut
 from app.schemas.course import CourseCreate, CourseUpdate, CourseListItem, CourseDetail
+from app.schemas.feedback import FeedbackOut
 from app.schemas.module import (
     ModuleCreate,
     ModuleUpdate,
@@ -352,6 +354,34 @@ def update_content_block(
     db.commit()
     db.refresh(block)
     return block
+
+
+@router.get("/modules/{module_id}/feedback", response_model=list[FeedbackOut])
+def admin_get_module_feedback(
+    module_id: int = Path(gt=0),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """List all feedback submitted for a module."""
+    entries = (
+        db.query(ModuleFeedback)
+        .filter(ModuleFeedback.module_id == module_id)
+        .order_by(ModuleFeedback.created_at.desc())
+        .all()
+    )
+    return [
+        FeedbackOut(
+            id=fb.id,
+            module_id=fb.module_id,
+            user_id=fb.user_id,
+            user_name=fb.user.name,
+            rating=fb.rating,
+            comment=fb.comment,
+            created_at=fb.created_at,
+            updated_at=fb.updated_at,
+        )
+        for fb in entries
+    ]
 
 
 @router.delete("/content-blocks/{block_id}", status_code=204)
