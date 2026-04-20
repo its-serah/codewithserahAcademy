@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useToast } from "../contexts/ToastContext";
 import { updateProfile, changePassword } from "../api/endpoints";
 
 const EMOJIS = [
@@ -40,6 +41,7 @@ const labelClass =
 export default function Profile() {
   const { user, refreshUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { showToast } = useToast();
 
   const [name, setName] = useState(user?.name ?? "");
   const [username, setUsername] = useState(user?.username ?? "");
@@ -50,14 +52,12 @@ export default function Profile() {
     user?.avatar_emoji ?? null,
   );
   const [profileSaving, setProfileSaving] = useState(false);
-  const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
-  const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
   const selectedPersonality = EMOJIS.find((e) => e.emoji === avatarEmoji);
@@ -69,7 +69,6 @@ export default function Profile() {
       return;
     }
     setProfileError("");
-    setProfileSuccess("");
     setProfileSaving(true);
     try {
       await updateProfile({
@@ -79,8 +78,7 @@ export default function Profile() {
         avatar_emoji: avatarEmoji,
       });
       await refreshUser();
-      setProfileSuccess("Profile updated successfully!");
-      setTimeout(() => setProfileSuccess(""), 3000);
+      showToast("Profile updated successfully!");
     } catch (err: any) {
       setProfileError(err.response?.data?.detail || "Failed to update profile");
     } finally {
@@ -99,15 +97,13 @@ export default function Profile() {
       return;
     }
     setPasswordError("");
-    setPasswordSuccess("");
     setPasswordSaving(true);
     try {
       await changePassword(currentPassword, newPassword);
-      setPasswordSuccess("Password changed successfully!");
+      showToast("Password changed successfully!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setTimeout(() => setPasswordSuccess(""), 3000);
     } catch (err: any) {
       setPasswordError(
         err.response?.data?.detail || "Failed to change password",
@@ -150,23 +146,6 @@ export default function Profile() {
               {profileError}
             </div>
           )}
-          {profileSuccess && (
-            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-xl text-sm">
-              <svg
-                className="w-4 h-4 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {profileSuccess}
-            </div>
-          )}
-
           {/* Avatar */}
           <div>
             <label className={labelClass}>Your Avatar</label>
@@ -356,22 +335,6 @@ export default function Profile() {
                 />
               </svg>
               {passwordError}
-            </div>
-          )}
-          {passwordSuccess && (
-            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-xl text-sm">
-              <svg
-                className="w-4 h-4 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {passwordSuccess}
             </div>
           )}
           <div>
