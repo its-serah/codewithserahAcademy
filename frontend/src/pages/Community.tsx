@@ -2,20 +2,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { getPosts, createPost, getCourses } from "../api/endpoints";
 
-interface Author {
-  id: number;
-  name: string;
-  username: string | null;
-  avatar_emoji: string | null;
-}
-
 interface Post {
   id: number;
+  user_id: number;
   title: string;
   body: string;
-  author: Author;
+  author_name: string;
+  author_emoji: string | null;
   course_id: number | null;
-  course_title?: string | null;
   comment_count: number;
   like_count: number;
   created_at: string;
@@ -56,17 +50,19 @@ export default function Community() {
       .catch(() => setCourses([]));
   }, []);
 
-  useEffect(() => {
+  const fetchPosts = (params: { course_id?: number; search?: string } = {}) => {
     setLoading(true);
+    getPosts(params)
+      .then((res) => setPosts(res.data))
+      .catch(() => setPosts([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
     const params: { course_id?: number; search?: string } = {};
     if (courseFilter) params.course_id = Number(courseFilter);
     if (search.trim()) params.search = search.trim();
-    const t = setTimeout(() => {
-      getPosts(params)
-        .then((res) => setPosts(res.data))
-        .catch(() => setPosts([]))
-        .finally(() => setLoading(false));
-    }, 250);
+    const t = setTimeout(() => fetchPosts(params), 250);
     return () => clearTimeout(t);
   }, [search, courseFilter]);
 
@@ -84,11 +80,14 @@ export default function Community() {
         body: body.trim(),
         course_id: postCourseId ? Number(postCourseId) : null,
       });
-      setPosts((p) => [res.data, ...p]);
       setTitle("");
       setBody("");
       setPostCourseId("");
       setShowForm(false);
+      const params: { course_id?: number; search?: string } = {};
+      if (courseFilter) params.course_id = Number(courseFilter);
+      if (search.trim()) params.search = search.trim();
+      fetchPosts(params);
     } catch (err: any) {
       setFormError(err.response?.data?.detail || "Failed to create post");
     } finally {
@@ -308,22 +307,12 @@ export default function Community() {
               className="block bg-white dark:bg-gray-800 px-5 py-4 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-brand/30 dark:hover:border-brand/30 hover:shadow-md transition-all duration-200 group"
             >
               <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                <span>{post.author.avatar_emoji ?? "👤"}</span>
+                <span>{post.author_emoji ?? "👤"}</span>
                 <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {post.author.username
-                    ? `@${post.author.username}`
-                    : post.author.name}
+                  {post.author_name}
                 </span>
                 <span>·</span>
                 <span>{timeAgo(post.created_at)}</span>
-                {post.course_title && (
-                  <>
-                    <span>·</span>
-                    <span className="text-brand font-medium">
-                      {post.course_title}
-                    </span>
-                  </>
-                )}
               </div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white group-hover:text-brand transition-colors mb-1.5">
                 {post.title}

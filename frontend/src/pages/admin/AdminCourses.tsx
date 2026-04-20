@@ -53,8 +53,12 @@ export default function AdminCourses() {
 
   const handleDelete = async (id: number, courseTitle: string) => {
     if (!confirm(`Delete "${courseTitle}"? This cannot be undone.`)) return;
-    await adminDeleteCourse(id);
-    load();
+    try {
+      await adminDeleteCourse(id);
+      load();
+    } catch {
+      alert("Failed to delete course. Please try again.");
+    }
   };
 
   const togglePublish = async (course: Course) => {

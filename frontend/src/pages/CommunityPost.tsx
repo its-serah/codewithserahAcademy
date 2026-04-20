@@ -9,17 +9,12 @@ import {
 } from "../api/endpoints";
 import { useAuth } from "../contexts/AuthContext";
 
-interface Author {
-  id: number;
-  name: string;
-  username: string | null;
-  avatar_emoji: string | null;
-}
-
 interface Comment {
   id: number;
+  user_id: number;
   body: string;
-  author: Author;
+  author_name: string;
+  author_emoji: string | null;
   parent_id: number | null;
   created_at: string;
   replies?: Comment[];
@@ -27,9 +22,11 @@ interface Comment {
 
 interface Post {
   id: number;
+  user_id: number;
   title: string;
   body: string;
-  author: Author;
+  author_name: string;
+  author_emoji: string | null;
   course_id: number | null;
   course_title?: string | null;
   like_count: number;
@@ -45,20 +42,6 @@ function timeAgo(iso: string) {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
   return new Date(iso).toLocaleDateString();
-}
-
-function buildTree(flat: Comment[]): Comment[] {
-  const byId = new Map<number, Comment>();
-  flat.forEach((c) => byId.set(c.id, { ...c, replies: [] }));
-  const roots: Comment[] = [];
-  byId.forEach((c) => {
-    if (c.parent_id && byId.has(c.parent_id)) {
-      byId.get(c.parent_id)!.replies!.push(c);
-    } else {
-      roots.push(c);
-    }
-  });
-  return roots;
 }
 
 export default function CommunityPost() {
@@ -194,11 +177,10 @@ export default function CommunityPost() {
     );
   }
 
-  const tree = buildTree(post.comments);
-  const isOwnPost = user?.id === post.author.id;
+  const isOwnPost = user?.id === post.user_id;
 
   const renderComment = (comment: Comment, depth = 0) => {
-    const isOwn = user?.id === comment.author.id;
+    const isOwn = user?.id === comment.user_id;
     return (
       <div
         key={comment.id}
@@ -206,11 +188,9 @@ export default function CommunityPost() {
       >
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-3">
           <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
-            <span>{comment.author.avatar_emoji ?? "👤"}</span>
+            <span>{comment.author_emoji ?? "👤"}</span>
             <span className="font-semibold text-gray-700 dark:text-gray-300">
-              {comment.author.username
-                ? `@${comment.author.username}`
-                : comment.author.name}
+              {comment.author_name}
             </span>
             <span>·</span>
             <span>{timeAgo(comment.created_at)}</span>
@@ -295,11 +275,9 @@ export default function CommunityPost() {
       {/* Post */}
       <article className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
-          <span className="text-base">{post.author.avatar_emoji ?? "👤"}</span>
+          <span className="text-base">{post.author_emoji ?? "👤"}</span>
           <span className="font-semibold text-gray-700 dark:text-gray-300">
-            {post.author.username
-              ? `@${post.author.username}`
-              : post.author.name}
+            {post.author_name}
           </span>
           <span>·</span>
           <span>{timeAgo(post.created_at)}</span>
@@ -383,12 +361,12 @@ export default function CommunityPost() {
           {post.comments.length}{" "}
           {post.comments.length === 1 ? "Comment" : "Comments"}
         </h2>
-        {tree.length === 0 ? (
+        {post.comments.length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-8">
             No comments yet. Be the first to reply.
           </p>
         ) : (
-          tree.map((c) => renderComment(c))
+          post.comments.map((c) => renderComment(c))
         )}
       </section>
     </div>

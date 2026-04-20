@@ -17,6 +17,11 @@ class Course(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     modules = relationship(
-        "Module", back_populates="course", order_by="Module.order_index"
+        "Module",
+        back_populates="course",
+        order_by="Module.order_index",
+        cascade="all, delete-orphan",
     )
-    enrollments = relationship("Enrollment", back_populates="course")
+    enrollments = relationship(
+        "Enrollment", back_populates="course", cascade="all, delete-orphan"
+    )

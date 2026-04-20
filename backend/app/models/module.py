@@ -17,5 +17,8 @@ class Module(Base):
 
     course = relationship("Course", back_populates="modules")
     content_blocks = relationship(
-        "ContentBlock", back_populates="module", order_by="ContentBlock.order_index"
+        "ContentBlock",
+        back_populates="module",
+        order_by="ContentBlock.order_index",
+        cascade="all, delete-orphan",
     )
