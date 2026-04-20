@@ -161,7 +161,21 @@ export default function AdminWaitlist() {
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         {entries.length === 0 ? (
           <div className="text-center py-12">
-            <span className="text-4xl">📋</span>
+            <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-light dark:bg-brand/20 text-brand mx-auto">
+              <svg
+                className="w-7 h-7"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+            </span>
             <p className="mt-3 text-gray-500 dark:text-gray-400 font-medium text-sm">
               No emails on the waitlist yet.
             </p>

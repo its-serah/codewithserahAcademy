@@ -14,13 +14,55 @@ const perks = [
   "Student community included",
 ];
 
+function EyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+      />
+    </svg>
+  ) : (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+      />
+    </svg>
+  );
+}
+
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [confirmError, setConfirmError] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { setToken } = useAuth();
@@ -39,15 +81,23 @@ export default function Register() {
     return "";
   };
 
+  const validateConfirm = (v: string, pw: string) => {
+    if (!v) return "Please confirm your password";
+    if (v !== pw) return "Passwords do not match";
+    return "";
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const nameErr = name.trim() ? "" : "Name is required";
     const emailErr = validateEmail(email);
     const passErr = validatePassword(password);
+    const confErr = validateConfirm(confirm, password);
     setNameError(nameErr);
     setEmailError(emailErr);
     setPasswordError(passErr);
-    if (nameErr || emailErr || passErr) return;
+    setConfirmError(confErr);
+    if (nameErr || emailErr || passErr || confErr) return;
     setError("");
     setLoading(true);
     try {
@@ -63,14 +113,14 @@ export default function Register() {
   };
 
   const inputCls = (hasErr: boolean) =>
-    `w-full px-4 py-2.5 rounded-xl border text-sm transition-colors focus:outline-none focus:ring-2 ${
+    `w-full pl-4 pr-10 py-2.5 rounded-xl border text-sm transition-colors focus:outline-none focus:ring-2 ${
       hasErr
         ? "border-red-400 focus:ring-red-200 bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-300"
         : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-brand/30 focus:border-brand"
     }`;
 
   const ErrorIcon = () => (
-    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400">
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 pointer-events-none">
       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -122,7 +172,7 @@ export default function Register() {
         <p className="text-white/40 text-xs">© CodewithSerah Academy</p>
       </div>
 
-      {/* Right panel – form */}
+      {/* Right panel */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-cream dark:bg-gray-900">
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
@@ -156,6 +206,7 @@ export default function Register() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                 Name
@@ -180,6 +231,7 @@ export default function Register() {
               )}
             </div>
 
+            {/* Email */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                 Email
@@ -206,29 +258,87 @@ export default function Register() {
               )}
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                 Password
               </label>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (passwordError)
                       setPasswordError(validatePassword(e.target.value));
+                    if (confirmError && confirm)
+                      setConfirmError(validateConfirm(confirm, e.target.value));
                   }}
                   onBlur={() => setPasswordError(validatePassword(password))}
                   required
                   minLength={6}
                   className={inputCls(!!passwordError)}
                 />
-                {passwordError && <ErrorIcon />}
+                {passwordError ? (
+                  <ErrorIcon />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    <EyeIcon open={showPassword} />
+                  </button>
+                )}
               </div>
               {passwordError && (
                 <p className="mt-1 text-xs text-red-600 dark:text-red-400">
                   {passwordError}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => {
+                    setConfirm(e.target.value);
+                    if (confirmError)
+                      setConfirmError(
+                        validateConfirm(e.target.value, password),
+                      );
+                  }}
+                  onBlur={() =>
+                    setConfirmError(validateConfirm(confirm, password))
+                  }
+                  required
+                  className={inputCls(!!confirmError)}
+                />
+                {confirmError ? (
+                  <ErrorIcon />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    aria-label={showConfirm ? "Hide password" : "Show password"}
+                  >
+                    <EyeIcon open={showConfirm} />
+                  </button>
+                )}
+              </div>
+              {confirmError && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                  {confirmError}
                 </p>
               )}
             </div>
