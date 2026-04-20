@@ -9,6 +9,8 @@ from app.models.waitlist import WaitlistEmail
 from app.models.course import Course
 from app.models.module import Module
 from app.models.content_block import ContentBlock
+from app.models.enrollment import Enrollment
+from app.models.progress import Progress
 from app.models.feedback import ModuleFeedback
 from app.schemas.waitlist import WaitlistAdd, WaitlistOut
 from app.schemas.course import CourseCreate, CourseUpdate, CourseListItem, CourseDetail
@@ -354,6 +356,98 @@ def update_content_block(
     db.commit()
     db.refresh(block)
     return block
+
+
+@router.get("/analytics")
+def get_analytics(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """Return platform-wide analytics for the admin dashboard."""
+    total_students = db.query(User).filter(User.role == "student").count()
+    total_enrollments = db.query(Enrollment).count()
+
+    courses = (
+        db.query(Course)
+        .options(joinedload(Course.modules))
+        .order_by(Course.created_at.desc())
+        .all()
+    )
+
+    course_stats = []
+    total_completions = 0
+
+    for course in courses:
+        enrolled = (
+            db.query(Enrollment).filter(Enrollment.course_id == course.id).count()
+        )
+
+        total_blocks = (
+            db.query(ContentBlock)
+            .join(Module)
+            .filter(Module.course_id == course.id)
+            .count()
+        )
+
+        completed_count = 0
+        if total_blocks > 0:
+            enrollments = (
+                db.query(Enrollment).filter(Enrollment.course_id == course.id).all()
+            )
+            for enr in enrollments:
+                done = (
+                    db.query(Progress)
+                    .join(ContentBlock)
+                    .join(Module)
+                    .filter(
+                        Module.course_id == course.id,
+                        Progress.user_id == enr.user_id,
+                        Progress.is_completed == True,  # noqa: E712
+                    )
+                    .count()
+                )
+                if done >= total_blocks:
+                    completed_count += 1
+
+        total_completions += completed_count
+
+        feedback_rows = (
+            db.query(ModuleFeedback)
+            .join(Module)
+            .filter(Module.course_id == course.id)
+            .all()
+        )
+        avg_feedback = (
+            round(sum(f.rating for f in feedback_rows) / len(feedback_rows), 1)
+            if feedback_rows
+            else None
+        )
+
+        course_stats.append(
+            {
+                "id": course.id,
+                "title": course.title,
+                "slug": course.slug,
+                "is_published": course.is_published,
+                "enrolled": enrolled,
+                "completions": completed_count,
+                "completion_rate": (
+                    round(completed_count / enrolled * 100, 1) if enrolled else 0
+                ),
+                "avg_feedback": avg_feedback,
+                "feedback_count": len(feedback_rows),
+            }
+        )
+
+    return {
+        "totals": {
+            "students": total_students,
+            "enrollments": total_enrollments,
+            "completions": total_completions,
+            "courses": len(courses),
+        },
+        "courses": course_stats,
+    }
 
 
 @router.get("/modules/{module_id}/feedback", response_model=list[FeedbackOut])

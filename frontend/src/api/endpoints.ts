@@ -119,6 +119,9 @@ export const submitFeedback = (
 export const getMyFeedback = (moduleId: number) =>
   api.get(`/modules/${moduleId}/feedback/mine`);
 
+// Admin - Analytics
+export const adminGetAnalytics = () => api.get("/admin/analytics");
+
 // Admin - Feedback
 export const adminGetModuleFeedback = (moduleId: number) =>
   api.get(`/admin/modules/${moduleId}/feedback`);
