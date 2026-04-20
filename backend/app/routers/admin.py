@@ -1,7 +1,11 @@
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Path, status
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
+
+logger = logging.getLogger("academy.admin")
 
 from app.dependencies import get_db, require_admin
 from app.models.user import User
@@ -364,90 +368,94 @@ def get_analytics(
     _: User = Depends(require_admin),
 ):
     """Return platform-wide analytics for the admin dashboard."""
-    total_students = db.query(User).filter(User.role == "student").count()
-    total_enrollments = db.query(Enrollment).count()
+    try:
+        total_students = db.query(User).filter(User.role == "student").count()
+        total_enrollments = db.query(Enrollment).count()
 
-    courses = (
-        db.query(Course)
-        .options(joinedload(Course.modules))
-        .order_by(Course.created_at.desc())
-        .all()
-    )
-
-    course_stats = []
-    total_completions = 0
-
-    for course in courses:
-        enrolled = (
-            db.query(Enrollment).filter(Enrollment.course_id == course.id).count()
-        )
-
-        total_blocks = (
-            db.query(ContentBlock)
-            .join(Module)
-            .filter(Module.course_id == course.id)
-            .count()
-        )
-
-        completed_count = 0
-        if total_blocks > 0:
-            enrollments = (
-                db.query(Enrollment).filter(Enrollment.course_id == course.id).all()
-            )
-            for enr in enrollments:
-                done = (
-                    db.query(Progress)
-                    .join(ContentBlock)
-                    .join(Module)
-                    .filter(
-                        Module.course_id == course.id,
-                        Progress.user_id == enr.user_id,
-                        Progress.is_completed == True,  # noqa: E712
-                    )
-                    .count()
-                )
-                if done >= total_blocks:
-                    completed_count += 1
-
-        total_completions += completed_count
-
-        feedback_rows = (
-            db.query(ModuleFeedback)
-            .join(Module)
-            .filter(Module.course_id == course.id)
+        courses = (
+            db.query(Course)
+            .options(joinedload(Course.modules))
+            .order_by(Course.created_at.desc())
             .all()
         )
-        avg_feedback = (
-            round(sum(f.rating for f in feedback_rows) / len(feedback_rows), 1)
-            if feedback_rows
-            else None
-        )
 
-        course_stats.append(
-            {
-                "id": course.id,
-                "title": course.title,
-                "slug": course.slug,
-                "is_published": course.is_published,
-                "enrolled": enrolled,
-                "completions": completed_count,
-                "completion_rate": (
-                    round(completed_count / enrolled * 100, 1) if enrolled else 0
-                ),
-                "avg_feedback": avg_feedback,
-                "feedback_count": len(feedback_rows),
-            }
-        )
+        course_stats = []
+        total_completions = 0
 
-    return {
-        "totals": {
-            "students": total_students,
-            "enrollments": total_enrollments,
-            "completions": total_completions,
-            "courses": len(courses),
-        },
-        "courses": course_stats,
-    }
+        for course in courses:
+            enrolled = (
+                db.query(Enrollment).filter(Enrollment.course_id == course.id).count()
+            )
+
+            total_blocks = (
+                db.query(ContentBlock)
+                .join(Module)
+                .filter(Module.course_id == course.id)
+                .count()
+            )
+
+            completed_count = 0
+            if total_blocks > 0:
+                enrollments = (
+                    db.query(Enrollment).filter(Enrollment.course_id == course.id).all()
+                )
+                for enr in enrollments:
+                    done = (
+                        db.query(Progress)
+                        .join(ContentBlock)
+                        .join(Module)
+                        .filter(
+                            Module.course_id == course.id,
+                            Progress.user_id == enr.user_id,
+                            Progress.is_completed == True,  # noqa: E712
+                        )
+                        .count()
+                    )
+                    if done >= total_blocks:
+                        completed_count += 1
+
+            total_completions += completed_count
+
+            feedback_rows = (
+                db.query(ModuleFeedback)
+                .join(Module)
+                .filter(Module.course_id == course.id)
+                .all()
+            )
+            avg_feedback = (
+                round(sum(f.rating for f in feedback_rows) / len(feedback_rows), 1)
+                if feedback_rows
+                else None
+            )
+
+            course_stats.append(
+                {
+                    "id": course.id,
+                    "title": course.title,
+                    "slug": course.slug,
+                    "is_published": course.is_published,
+                    "enrolled": enrolled,
+                    "completions": completed_count,
+                    "completion_rate": (
+                        round(completed_count / enrolled * 100, 1) if enrolled else 0
+                    ),
+                    "avg_feedback": avg_feedback,
+                    "feedback_count": len(feedback_rows),
+                }
+            )
+
+        return {
+            "totals": {
+                "students": total_students,
+                "enrollments": total_enrollments,
+                "completions": total_completions,
+                "courses": len(courses),
+            },
+            "courses": course_stats,
+        }
+    except SQLAlchemyError as e:
+        logger.error("Analytics query failed: %s", e)
+        raise HTTPException(status_code=500, detail="Failed to load analytics")
 
 
 @router.get("/modules/{module_id}/feedback", response_model=list[FeedbackOut])
