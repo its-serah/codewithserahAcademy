@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getCourse, enroll, getModules } from "../api/endpoints";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 
 interface Module {
   id: number;
@@ -23,6 +24,8 @@ export default function CourseDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { showToast } = useToast();
   const [course, setCourse] = useState<Course | null>(null);
   const [modules, setModules] = useState<Module[] | null>(null);
   const [enrolling, setEnrolling] = useState(false);
@@ -48,7 +51,7 @@ export default function CourseDetail() {
 
   const handleEnroll = async () => {
     if (!user) {
-      navigate("/login");
+      navigate("/login", { state: { from: location.pathname } });
       return;
     }
     if (!slug) return;
@@ -56,10 +59,14 @@ export default function CourseDetail() {
     try {
       await enroll(slug);
       setEnrolled(true);
+      showToast("Enrolled successfully!");
       const res = await getModules(slug);
       setModules(res.data);
-    } catch {
-      /* already enrolled */
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status !== 400 && status !== 409) {
+        showToast("Failed to enroll. Please try again.", "error");
+      }
     } finally {
       setEnrolling(false);
     }

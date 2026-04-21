@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { login } from "../api/endpoints";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
@@ -61,6 +61,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { setToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
 
   const validateEmail = (v: string) => {
@@ -88,7 +89,8 @@ export default function Login() {
       const res = await login(email, password);
       setToken(res.data.access_token);
       showToast("Welcome back!");
-      navigate("/dashboard");
+      const from = (location.state as any)?.from || "/dashboard";
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.detail || "Login failed");
       setEmailError(" ");
