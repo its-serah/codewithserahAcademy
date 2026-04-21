@@ -7,7 +7,6 @@ from app.models.enrollment import Enrollment
 from app.models.progress import Progress
 from app.models.module_completion import ModuleCompletion
 from app.models.token import PasswordResetToken, EmailVerificationToken
-from app.models.community import Post, Comment, PostLike
 
 __all__ = [
     "User",
@@ -20,7 +19,4 @@ __all__ = [
     "ModuleCompletion",
     "PasswordResetToken",
     "EmailVerificationToken",
-    "Post",
-    "Comment",
-    "PostLike",
 ]

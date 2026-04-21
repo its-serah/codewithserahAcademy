@@ -12,7 +12,6 @@ from app.routers import (
     enrollments,
     progress,
     admin,
-    community,
     feedback,
 )
 
@@ -34,7 +33,6 @@ app.include_router(modules.router)
 app.include_router(enrollments.router)
 app.include_router(progress.router)
 app.include_router(admin.router)
-app.include_router(community.router)
 app.include_router(feedback.router)
 
 
