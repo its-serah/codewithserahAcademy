@@ -75,7 +75,7 @@ export default function Community() {
     setFormError("");
     setSubmitting(true);
     try {
-      const res = await createPost({
+      await createPost({
         title: title.trim(),
         body: body.trim(),
         course_id: postCourseId ? Number(postCourseId) : null,
