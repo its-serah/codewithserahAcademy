@@ -8,6 +8,7 @@ import {
   submitFeedback,
   getMyFeedback,
 } from "../api/endpoints";
+import { useToast } from "../contexts/ToastContext";
 
 interface ContentBlock {
   id: number;
@@ -28,6 +29,7 @@ interface ModuleData {
 
 export default function ModuleView() {
   const { slug, moduleId } = useParams<{ slug: string; moduleId: string }>();
+  const { showToast } = useToast();
   const [module, setModule] = useState<ModuleData | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -320,8 +322,12 @@ export default function ModuleView() {
                 comment: feedbackComment || undefined,
               });
               setFeedbackSubmitted(true);
+              showToast(
+                feedbackSubmitted ? "Feedback updated!" : "Feedback submitted!",
+              );
             } catch {
               setFeedbackError("Failed to save feedback. Please try again.");
+              showToast("Failed to save feedback.", "error");
             } finally {
               setFeedbackSubmitting(false);
             }

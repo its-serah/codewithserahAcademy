@@ -9,14 +9,11 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const CourseList = lazy(() => import("./pages/CourseList"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const ModuleView = lazy(() => import("./pages/ModuleView"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
-const Community = lazy(() => import("./pages/Community"));
-const CommunityPost = lazy(() => import("./pages/CommunityPost"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminWaitlist = lazy(() => import("./pages/admin/AdminWaitlist"));
@@ -49,23 +46,6 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route
-              path="/community"
-              element={
-                <ProtectedRoute>
-                  <Community />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/community/posts/:id"
-              element={
-                <ProtectedRoute>
-                  <CommunityPost />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/courses"
               element={

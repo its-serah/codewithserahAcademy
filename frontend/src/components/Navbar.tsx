@@ -21,7 +21,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/70 dark:border-gray-700/70 transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
         {/* Logo */}
         <Link
           to="/"
@@ -31,7 +31,7 @@ export default function Navbar() {
           <img
             src={logo}
             alt="CodewithSerah Academy"
-            className="h-12 w-auto object-contain"
+            className="h-16 w-auto object-contain"
           />
         </Link>
 
@@ -50,12 +50,6 @@ export default function Navbar() {
               >
                 Dashboard
               </NavLink>
-              <NavLink
-                to="/community"
-                active={location.pathname.startsWith("/community")}
-              >
-                Community
-              </NavLink>
               {user.role === "admin" && (
                 <NavLink
                   to="/admin"
@@ -66,7 +60,11 @@ export default function Navbar() {
               )}
               <Link
                 to="/profile"
-                className="ml-1 flex items-center gap-2 pl-3 pr-4 py-1.5 rounded-full bg-brand-light dark:bg-brand/20 text-brand text-sm font-medium hover:bg-brand/20 dark:hover:bg-brand/30 transition-colors"
+                className={`ml-1 flex items-center gap-2 pl-3 pr-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  location.pathname === "/profile"
+                    ? "bg-brand text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-brand-light dark:hover:bg-brand/20 hover:text-brand dark:hover:text-brand"
+                }`}
               >
                 <span className="text-base leading-none" aria-hidden="true">
                   {user.avatar_emoji ?? "👤"}
@@ -83,17 +81,17 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            <>
+            <div className="flex items-center gap-2 ml-auto">
               <NavLink to="/login" active={location.pathname === "/login"}>
                 Login
               </NavLink>
               <Link
                 to="/register"
-                className="ml-2 bg-brand text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-brand-dark hover:shadow-md hover:shadow-brand/20 transition-all duration-200"
+                className="bg-brand text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-brand-dark hover:shadow-md hover:shadow-brand/20 transition-all duration-200"
               >
                 Get Started
               </Link>
-            </>
+            </div>
           )}
         </div>
 
@@ -201,26 +199,6 @@ export default function Navbar() {
                   />
                 </svg>
                 Dashboard
-              </MobileNavLink>
-              <MobileNavLink
-                to="/community"
-                onClick={close}
-                active={location.pathname.startsWith("/community")}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                Community
               </MobileNavLink>
               {user.role === "admin" && (
                 <MobileNavLink
@@ -354,8 +332,8 @@ function NavLink({
       to={to}
       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         active
-          ? "text-brand bg-brand-light dark:bg-brand/10"
-          : "text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand hover:bg-brand-light/50 dark:hover:bg-brand/10"
+          ? "text-brand bg-brand/20 dark:bg-brand/25 font-semibold"
+          : "text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand hover:bg-brand/8 dark:hover:bg-brand/10"
       }`}
     >
       {children}
@@ -380,8 +358,8 @@ function MobileNavLink({
       onClick={onClick}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
         active
-          ? "text-brand bg-brand-light dark:bg-brand/10"
-          : "text-gray-700 dark:text-gray-300 hover:text-brand hover:bg-brand-light/50 dark:hover:bg-brand/10"
+          ? "text-brand bg-brand/20 dark:bg-brand/25 font-semibold"
+          : "text-gray-700 dark:text-gray-300 hover:text-brand hover:bg-brand/8 dark:hover:bg-brand/10"
       }`}
     >
       {children}

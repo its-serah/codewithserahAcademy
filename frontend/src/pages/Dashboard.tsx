@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getEnrollments, resendVerification } from "../api/endpoints";
+import { getEnrollments } from "../api/endpoints";
 import { useAuth } from "../contexts/AuthContext";
 
 interface Enrollment {
@@ -16,21 +16,6 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [resendMsg, setResendMsg] = useState("");
-  const [resending, setResending] = useState(false);
-
-  const handleResend = async () => {
-    setResending(true);
-    try {
-      await resendVerification();
-      setResendMsg("Verification email sent. Check your inbox.");
-    } catch {
-      setResendMsg("Failed to send. Please try again later.");
-    } finally {
-      setResending(false);
-      setTimeout(() => setResendMsg(""), 4000);
-    }
-  };
 
   useEffect(() => {
     getEnrollments()
@@ -55,34 +40,6 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      {/* Verification banner */}
-      {user && !user.is_verified && (
-        <div className="flex items-center justify-between gap-3 flex-wrap bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-400 px-4 py-3 rounded-xl text-sm">
-          <div className="flex items-center gap-2">
-            <svg
-              className="w-4 h-4 flex-shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l6.518 11.59c.75 1.334-.213 2.98-1.742 2.98H3.48c-1.53 0-2.493-1.646-1.743-2.98L8.257 3.1zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Please verify your email address. Check your inbox or{" "}
-            <button
-              onClick={handleResend}
-              disabled={resending}
-              className="underline font-semibold hover:text-amber-900 dark:hover:text-amber-300 disabled:opacity-60"
-            >
-              {resending ? "sending…" : "resend"}
-            </button>
-          </div>
-          {resendMsg && <span className="text-xs">{resendMsg}</span>}
-        </div>
-      )}
-
       {/* Welcome card */}
       <div className="relative overflow-hidden bg-gradient-to-br from-brand to-brand-dark rounded-2xl p-7 text-white shadow-lg shadow-brand/20">
         <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/5" />
@@ -120,12 +77,6 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Your courses
           </h2>
-          <Link
-            to="/courses"
-            className="text-sm text-brand hover:underline font-medium"
-          >
-            Browse more →
-          </Link>
         </div>
 
         {enrollments.length === 0 ? (
