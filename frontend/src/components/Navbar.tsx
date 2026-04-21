@@ -21,7 +21,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/70 dark:border-gray-700/70 transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-24">
         {/* Logo */}
         <Link
           to="/"
@@ -31,7 +31,7 @@ export default function Navbar() {
           <img
             src={logo}
             alt="CodewithSerah Academy"
-            className="h-16 w-auto object-contain"
+            className="h-20 w-auto object-contain"
           />
         </Link>
 
