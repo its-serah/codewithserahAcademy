@@ -29,7 +29,7 @@ export default function CourseDetail() {
   const [course, setCourse] = useState<Course | null>(null);
   const [modules, setModules] = useState<Module[] | null>(null);
   const [enrolling, setEnrolling] = useState(false);
-  const [enrolled, setEnrolled] = useState(false);
+  const [enrolled, setEnrolled] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,11 @@ export default function CourseDetail() {
   }, [slug]);
 
   useEffect(() => {
-    if (!slug || !user) return;
+    if (!slug) return;
+    if (!user) {
+      setEnrolled(false);
+      return;
+    }
     getModules(slug)
       .then((res) => {
         setModules(res.data);
@@ -122,7 +126,7 @@ export default function CourseDetail() {
             </p>
           )}
           <div className="mt-6 flex items-center gap-4 flex-wrap">
-            {enrolled ? (
+            {enrolled === null ? null : enrolled ? (
               <span className="inline-flex items-center gap-2 bg-white/20 text-white text-sm font-semibold px-4 py-2 rounded-full">
                 <svg
                   className="w-4 h-4"
