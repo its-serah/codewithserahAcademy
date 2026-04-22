@@ -35,19 +35,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
+    const root = document.documentElement;
 
     if (!("startViewTransition" in document)) {
-      document.documentElement.classList.add("theme-transitioning");
+      root.classList.add("theme-transitioning");
       setTheme(next);
-      setTimeout(
-        () => document.documentElement.classList.remove("theme-transitioning"),
-        400,
-      );
+      setTimeout(() => root.classList.remove("theme-transitioning"), 400);
       return;
     }
 
     (document as any).startViewTransition(() => {
-      document.documentElement.classList.toggle("dark", next === "dark");
+      root.classList.toggle("dark", next === "dark");
       setTheme(next);
     });
   };
