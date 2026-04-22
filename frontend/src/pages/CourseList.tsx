@@ -31,7 +31,10 @@ function LockedCourseCard({
           </svg>
         </span>
         <span className="text-xs font-bold tracking-widest uppercase text-gray-500 dark:text-gray-400">
-          Coming Soon
+          Not Available Yet
+        </span>
+        <span className="text-xs text-gray-400 dark:text-gray-500 text-center px-4">
+          This course is not yet open for enrollment.
         </span>
       </div>
 
