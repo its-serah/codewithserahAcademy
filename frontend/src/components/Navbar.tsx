@@ -82,9 +82,16 @@ export default function Navbar() {
             </>
           ) : (
             <div className="flex items-center gap-2 ml-auto">
-              <NavLink to="/login" active={location.pathname === "/login"}>
+              <Link
+                to="/login"
+                className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
+                  location.pathname === "/login"
+                    ? "border-brand text-brand bg-brand/5"
+                    : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-brand hover:text-brand dark:hover:text-brand"
+                }`}
+              >
                 Login
-              </NavLink>
+              </Link>
               <Link
                 to="/register"
                 className="bg-brand text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-brand-dark hover:shadow-md hover:shadow-brand/20 transition-all duration-200"
