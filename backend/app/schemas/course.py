@@ -36,6 +36,7 @@ class CourseListItem(BaseModel):
     description: str | None
     thumbnail_url: str | None
     is_published: bool
+    is_coming_soon: bool = False
     created_at: datetime
     module_count: int = 0
 

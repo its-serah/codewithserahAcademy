@@ -22,7 +22,11 @@ def list_courses(
     q = (
         db.query(Course)
         .options(joinedload(Course.modules))
-        .filter(Course.is_published == True)  # noqa: E712
+        .filter(
+            or_(
+                Course.is_published == True, Course.is_coming_soon == True
+            )  # noqa: E712
+        )
     )
 
     if search:
@@ -44,6 +48,7 @@ def list_courses(
             description=c.description,
             thumbnail_url=c.thumbnail_url,
             is_published=c.is_published,
+            is_coming_soon=c.is_coming_soon,
             created_at=c.created_at,
             module_count=len(c.modules),
         )
