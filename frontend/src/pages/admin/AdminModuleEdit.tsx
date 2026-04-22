@@ -430,6 +430,20 @@ export default function AdminModuleEdit() {
                   rows={8}
                   className={`${inputClass} font-mono resize-y`}
                 />
+                <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+                  Supports Markdown — add links with{" "}
+                  <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-gray-600 dark:text-gray-300">
+                    [link text](https://url.com)
+                  </code>
+                  , bold with{" "}
+                  <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-gray-600 dark:text-gray-300">
+                    **text**
+                  </code>
+                  , headings with{" "}
+                  <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-gray-600 dark:text-gray-300">
+                    # Heading
+                  </code>
+                </p>
               </div>
             )}
             {blockType === "video" && (

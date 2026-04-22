@@ -197,7 +197,21 @@ export default function ModuleView() {
               )}
               {block.type === "reading" && block.markdown_content && (
                 <div className="prose prose-gray dark:prose-invert max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      a: ({ href, children }) => (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand underline hover:text-brand-dark"
+                        >
+                          {children}
+                        </a>
+                      ),
+                    }}
+                  >
                     {block.markdown_content}
                   </ReactMarkdown>
                 </div>
