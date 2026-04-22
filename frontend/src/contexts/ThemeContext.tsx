@@ -34,11 +34,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   const toggleTheme = () => {
-    document.documentElement.classList.add("theme-transitioning");
-    setTheme((t) => (t === "light" ? "dark" : "light"));
-    setTimeout(() => {
-      document.documentElement.classList.remove("theme-transitioning");
-    }, 400);
+    const next = theme === "light" ? "dark" : "light";
+
+    if (!("startViewTransition" in document)) {
+      document.documentElement.classList.add("theme-transitioning");
+      setTheme(next);
+      setTimeout(
+        () => document.documentElement.classList.remove("theme-transitioning"),
+        400,
+      );
+      return;
+    }
+
+    (document as any).startViewTransition(() => {
+      document.documentElement.classList.toggle("dark", next === "dark");
+      setTheme(next);
+    });
   };
 
   return (

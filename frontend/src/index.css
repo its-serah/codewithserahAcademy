@@ -35,6 +35,23 @@ html {
     fill 0.3s ease !important;
 }
 
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0% at calc(100% - 3rem) 3rem);
+  }
+  to {
+    clip-path: circle(150% at calc(100% - 3rem) 3rem);
+  }
+}
+
+::view-transition-old(root) {
+  animation: none;
+}
+
+::view-transition-new(root) {
+  animation: theme-reveal 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
