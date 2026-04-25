@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -29,9 +29,12 @@ interface ModuleData {
 
 export default function ModuleView() {
   const { slug, moduleId } = useParams<{ slug: string; moduleId: string }>();
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [module, setModule] = useState<ModuleData | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<number>>(new Set());
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [completing, setCompleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [feedbackRating, setFeedbackRating] = useState(0);
@@ -60,12 +63,26 @@ export default function ModuleView() {
       .catch(() => {});
   }, [slug, moduleId]);
 
-  const handleComplete = async (blockId: number) => {
+  const handleComplete = async () => {
+    if (!module) return;
+    const block = module.content_blocks[currentIndex];
+    if (!block) return;
+
+    setCompleting(true);
     try {
-      await completeBlock(blockId);
-      setCompletedIds((prev) => new Set(prev).add(blockId));
+      await completeBlock(block.id);
+      setCompletedIds((prev) => new Set(prev).add(block.id));
+
+      const isLast = currentIndex === module.content_blocks.length - 1;
+      if (isLast) {
+        // Stay on page to show feedback + completion message
+      } else {
+        setCurrentIndex((i) => i + 1);
+      }
     } catch {
       /* ignore */
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -106,13 +123,12 @@ export default function ModuleView() {
 
   if (!module) return null;
 
+  const blocks = module.content_blocks;
+  const block = blocks[currentIndex];
+  const isCurrentCompleted = block ? completedIds.has(block.id) : false;
+  const isLast = currentIndex === blocks.length - 1;
   const allCompleted =
-    module.content_blocks.length > 0 &&
-    module.content_blocks.every((b) => completedIds.has(b.id));
-
-  const completedCount = module.content_blocks.filter((b) =>
-    completedIds.has(b.id),
-  ).length;
+    blocks.length > 0 && blocks.every((b) => completedIds.has(b.id));
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -150,74 +166,138 @@ export default function ModuleView() {
           </p>
         )}
 
-        {module.content_blocks.length > 0 && (
+        {blocks.length > 0 && (
           <div className="mt-4 flex items-center gap-3">
             <div className="flex-1 max-w-xs h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="h-full bg-brand rounded-full transition-all duration-500"
                 style={{
-                  width: `${(completedCount / module.content_blocks.length) * 100}%`,
+                  width: `${(completedIds.size / blocks.length) * 100}%`,
                 }}
               />
             </div>
             <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-              {completedCount}/{module.content_blocks.length} completed
+              {completedIds.size}/{blocks.length} completed
             </span>
+          </div>
+        )}
+
+        {/* Step indicators */}
+        {blocks.length > 1 && (
+          <div className="mt-4 flex items-center gap-1.5 flex-wrap">
+            {blocks.map((b, i) => (
+              <button
+                key={b.id}
+                onClick={() =>
+                  completedIds.has(b.id) || i <= currentIndex
+                    ? setCurrentIndex(i)
+                    : undefined
+                }
+                disabled={!completedIds.has(b.id) && i > currentIndex}
+                className={`w-7 h-7 rounded-full text-xs font-bold transition-all ${
+                  i === currentIndex
+                    ? "bg-brand text-white scale-110"
+                    : completedIds.has(b.id)
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                }`}
+                title={b.title || `Step ${i + 1}`}
+              >
+                {completedIds.has(b.id) && i !== currentIndex ? (
+                  <svg
+                    className="w-3.5 h-3.5 mx-auto"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : (
+                  i + 1
+                )}
+              </button>
+            ))}
           </div>
         )}
       </div>
 
-      <div className="space-y-6">
-        {module.content_blocks.map((block) => (
-          <div
-            key={block.id}
-            className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-          >
-            {block.title && (
-              <div className="px-6 py-3.5 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {block.title}
-                </h3>
-                <span className="text-xs px-2.5 py-1 bg-brand-light dark:bg-brand/20 text-brand rounded-full font-medium capitalize">
-                  {block.type}
-                </span>
+      {/* Current block */}
+      {block && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {block.title && (
+            <div className="px-6 py-3.5 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                {block.title}
+              </h3>
+              <span className="text-xs px-2.5 py-1 bg-brand-light dark:bg-brand/20 text-brand rounded-full font-medium capitalize">
+                {block.type}
+              </span>
+            </div>
+          )}
+          <div className="p-6">
+            {block.type === "video" && block.youtube_video_id && (
+              <div className="aspect-video rounded-xl overflow-hidden">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${block.youtube_video_id}`}
+                  title={block.title || "Video"}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               </div>
             )}
-            <div className="p-6">
-              {block.type === "video" && block.youtube_video_id && (
-                <div className="aspect-video rounded-xl overflow-hidden">
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${block.youtube_video_id}`}
-                    title={block.title || "Video"}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              )}
-              {block.type === "reading" && block.markdown_content && (
-                <div className="prose prose-gray dark:prose-invert max-w-none">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      a: ({ href, children }) => (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-brand underline hover:text-brand-dark"
-                        >
-                          {children}
-                        </a>
-                      ),
-                    }}
+            {block.type === "reading" && block.markdown_content && (
+              <div className="prose prose-gray dark:prose-invert max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a: ({ href, children }) => (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-brand underline hover:text-brand-dark"
+                      >
+                        {children}
+                      </a>
+                    ),
+                  }}
+                >
+                  {block.markdown_content}
+                </ReactMarkdown>
+              </div>
+            )}
+
+            <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                {currentIndex > 0 && (
+                  <button
+                    onClick={() => setCurrentIndex((i) => i - 1)}
+                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 transition-colors"
                   >
-                    {block.markdown_content}
-                  </ReactMarkdown>
-                </div>
-              )}
-              <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
-                {completedIds.has(block.id) ? (
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                    Previous
+                  </button>
+                )}
+              </div>
+
+              {isCurrentCompleted ? (
+                isLast ? (
                   <span className="inline-flex items-center gap-1.5 text-green-600 dark:text-green-400 text-sm font-semibold">
                     <svg
                       className="w-4 h-4"
@@ -234,17 +314,42 @@ export default function ModuleView() {
                   </span>
                 ) : (
                   <button
-                    onClick={() => handleComplete(block.id)}
-                    className="text-sm bg-brand text-white px-5 py-2 rounded-full hover:bg-brand-dark transition-colors font-semibold shadow-sm shadow-brand/20"
+                    onClick={() => setCurrentIndex((i) => i + 1)}
+                    className="text-sm bg-brand text-white px-5 py-2 rounded-full hover:bg-brand-dark transition-colors font-semibold shadow-sm shadow-brand/20 flex items-center gap-1.5"
                   >
-                    Mark as complete
+                    Next
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
                   </button>
-                )}
-              </div>
+                )
+              ) : (
+                <button
+                  onClick={handleComplete}
+                  disabled={completing}
+                  className="text-sm bg-brand text-white px-5 py-2 rounded-full hover:bg-brand-dark disabled:opacity-60 transition-colors font-semibold shadow-sm shadow-brand/20"
+                >
+                  {completing
+                    ? "Saving…"
+                    : isLast
+                      ? "Complete module"
+                      : "Complete & continue"}
+                </button>
+              )}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {allCompleted && (
         <div className="mt-8 flex items-center gap-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-2xl border border-green-200 dark:border-green-800 px-6 py-4">
@@ -279,7 +384,6 @@ export default function ModuleView() {
             : "Rate this module and leave an optional comment."}
         </p>
 
-        {/* Stars */}
         <div className="flex items-center gap-1 mb-4">
           {[1, 2, 3, 4, 5].map((star) => (
             <button

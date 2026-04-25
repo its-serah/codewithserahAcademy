@@ -36,7 +36,9 @@ def _require_enrollment(user_id: int, course_id: int, db: Session):
 
 
 def _is_module_unlocked(user_id: int, module: Module, db: Session) -> bool:
-    """Module 1 is always unlocked. Module N requires Module N-1 to be completed."""
+    """Module 1 is always unlocked unless admin-locked. Module N requires Module N-1 to be completed."""
+    if getattr(module, "is_locked", False):
+        return False
     if module.order_index == 1:
         return True
     prev_module = (
@@ -84,6 +86,7 @@ def list_modules(
             description=m.description,
             order_index=m.order_index,
             is_unlocked=_is_module_unlocked(user.id, m, db),
+            is_locked=getattr(m, "is_locked", False),
         )
         for m in modules
     ]

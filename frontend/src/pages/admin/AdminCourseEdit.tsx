@@ -5,13 +5,16 @@ import {
   adminUpdateCourse,
   adminCreateModule,
   adminDeleteModule,
+  adminToggleModuleLock,
 } from "../../api/endpoints";
+import { useToast } from "../../contexts/ToastContext";
 
 interface ModuleSummary {
   id: number;
   title: string;
   description: string | null;
   order_index: number;
+  is_locked?: boolean;
 }
 
 interface CourseData {
@@ -31,6 +34,7 @@ const labelClass =
 
 export default function AdminCourseEdit() {
   const { id } = useParams<{ id: string }>();
+  const { showToast } = useToast();
   const [course, setCourse] = useState<CourseData | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -84,8 +88,21 @@ export default function AdminCourseEdit() {
 
   const handleDeleteModule = async (moduleId: number, modTitle: string) => {
     if (!confirm(`Delete module "${modTitle}"?`)) return;
-    await adminDeleteModule(moduleId);
-    load();
+    try {
+      await adminDeleteModule(moduleId);
+      load();
+    } catch {
+      showToast("Failed to delete module.", "error");
+    }
+  };
+
+  const handleToggleLock = async (moduleId: number) => {
+    try {
+      await adminToggleModuleLock(moduleId);
+      load();
+    } catch {
+      showToast("Failed to update module lock.", "error");
+    }
   };
 
   if (loading)
@@ -231,6 +248,17 @@ export default function AdminCourseEdit() {
                   {mod.title}
                 </span>
                 <div className="flex items-center gap-3 flex-shrink-0">
+                  <button
+                    onClick={() => handleToggleLock(mod.id)}
+                    title={mod.is_locked ? "Unlock module" : "Lock module"}
+                    className={`text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
+                      mod.is_locked
+                        ? "border-red-300 text-red-600 dark:border-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        : "border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    {mod.is_locked ? "Locked" : "Unlocked"}
+                  </button>
                   <Link
                     to={`/admin/courses/${id}/modules/${mod.id}`}
                     className="text-xs text-brand hover:underline font-medium"

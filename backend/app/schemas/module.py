@@ -20,6 +20,7 @@ class ModuleWithLock(BaseModel):
     description: str | None
     order_index: int
     is_unlocked: bool
+    is_locked: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -43,6 +44,7 @@ class ModuleCreate(BaseModel):
 class ModuleUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
+    is_locked: bool | None = None
 
 
 class ModuleReorder(BaseModel):

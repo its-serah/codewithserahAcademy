@@ -110,6 +110,8 @@ export const adminDeleteModule = (id: number) =>
   api.delete(`/admin/modules/${id}`);
 export const adminReorderModules = (module_ids: number[]) =>
   api.post("/admin/modules/reorder", { module_ids });
+export const adminToggleModuleLock = (id: number) =>
+  api.patch(`/admin/modules/${id}/lock`);
 
 // Feedback
 export const submitFeedback = (

@@ -1,4 +1,12 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Integer,
+    String,
+    Text,
+    ForeignKey,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -14,6 +22,7 @@ class Module(Base):
     title = Column(String, nullable=False)
     description = Column(Text)
     order_index = Column(Integer, nullable=False)
+    is_locked = Column(Boolean, nullable=False, default=False, server_default="false")
 
     course = relationship("Course", back_populates="modules")
     content_blocks = relationship(

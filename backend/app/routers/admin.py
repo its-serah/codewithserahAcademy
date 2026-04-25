@@ -281,6 +281,23 @@ def update_module(
     return module
 
 
+@router.patch("/modules/{module_id}/lock", status_code=200)
+def toggle_module_lock(
+    module_id: int = Path(gt=0),
+    *,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """Toggle the admin lock on a module. Locked modules are inaccessible to students regardless of progress."""
+    module = db.query(Module).filter(Module.id == module_id).first()
+    if not module:
+        raise HTTPException(status_code=404, detail="Module not found")
+    module.is_locked = not getattr(module, "is_locked", False)
+    db.commit()
+    db.refresh(module)
+    return {"id": module.id, "is_locked": module.is_locked}
+
+
 @router.delete("/modules/{module_id}", status_code=204)
 def delete_module(
     module_id: int = Path(gt=0),
