@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -29,7 +29,6 @@ interface ModuleData {
 
 export default function ModuleView() {
   const { slug, moduleId } = useParams<{ slug: string; moduleId: string }>();
-  const navigate = useNavigate();
   const { showToast } = useToast();
   const [module, setModule] = useState<ModuleData | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<number>>(new Set());
