@@ -25,6 +25,7 @@ class ModuleSummary(BaseModel):
     title: str
     description: str | None
     order_index: int
+    is_locked: bool = False
 
     model_config = {"from_attributes": True}
 
