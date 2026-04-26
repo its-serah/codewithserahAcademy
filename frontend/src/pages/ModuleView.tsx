@@ -72,15 +72,14 @@ export default function ModuleView() {
     try {
       await completeBlock(block.id);
       setCompletedIds((prev) => new Set(prev).add(block.id));
-
       const isLast = currentIndex === module.content_blocks.length - 1;
-      if (isLast) {
-        // Stay on page to show feedback + completion message
-      } else {
-        setCurrentIndex((i) => i + 1);
+      if (!isLast) {
+        setCurrentIndex((i) =>
+          Math.min(i + 1, module.content_blocks.length - 1),
+        );
       }
     } catch {
-      /* ignore */
+      showToast("Failed to save progress. Please try again.", "error");
     } finally {
       setCompleting(false);
     }
