@@ -124,11 +124,41 @@ export default function ModuleView() {
   if (!module) return null;
 
   const blocks = module.content_blocks;
-  const block = blocks[currentIndex];
-  const isCurrentCompleted = block ? completedIds.has(block.id) : false;
-  const isLast = currentIndex === blocks.length - 1;
-  const allCompleted =
-    blocks.length > 0 && blocks.every((b) => completedIds.has(b.id));
+
+  if (blocks.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        <Link
+          to={`/courses/${slug}`}
+          className="inline-flex items-center gap-1 text-sm text-brand hover:underline mb-6"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Back to course
+        </Link>
+        <p className="text-gray-500 dark:text-gray-400">
+          This module has no content yet.
+        </p>
+      </div>
+    );
+  }
+
+  const safeIndex = Math.max(0, Math.min(currentIndex, blocks.length - 1));
+  const block = blocks[safeIndex];
+  const isCurrentCompleted = completedIds.has(block.id);
+  const isLast = safeIndex === blocks.length - 1;
+  const allCompleted = blocks.every((b) => completedIds.has(b.id));
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -188,11 +218,13 @@ export default function ModuleView() {
             {blocks.map((b, i) => (
               <button
                 key={b.id}
-                onClick={() =>
-                  completedIds.has(b.id) || i <= currentIndex
-                    ? setCurrentIndex(i)
-                    : undefined
-                }
+                onClick={() => {
+                  if (completedIds.has(b.id) || i <= currentIndex) {
+                    setCurrentIndex(
+                      Math.max(0, Math.min(i, blocks.length - 1)),
+                    );
+                  }
+                }}
                 disabled={!completedIds.has(b.id) && i > currentIndex}
                 className={`w-7 h-7 rounded-full text-xs font-bold transition-all ${
                   i === currentIndex
@@ -275,7 +307,7 @@ export default function ModuleView() {
               <div className="flex items-center gap-3">
                 {currentIndex > 0 && (
                   <button
-                    onClick={() => setCurrentIndex((i) => i - 1)}
+                    onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
                     className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 transition-colors"
                   >
                     <svg
@@ -314,7 +346,9 @@ export default function ModuleView() {
                   </span>
                 ) : (
                   <button
-                    onClick={() => setCurrentIndex((i) => i + 1)}
+                    onClick={() =>
+                      setCurrentIndex((i) => Math.min(i + 1, blocks.length - 1))
+                    }
                     className="text-sm bg-brand text-white px-5 py-2 rounded-full hover:bg-brand-dark transition-colors font-semibold shadow-sm shadow-brand/20 flex items-center gap-1.5"
                   >
                     Next
