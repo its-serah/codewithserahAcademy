@@ -75,6 +75,8 @@ export const getModule = (slug: string, moduleId: number) =>
 // Progress
 export const completeBlock = (blockId: number) =>
   api.post(`/progress/${blockId}/complete`);
+export const getModuleProgress = (moduleId: number) =>
+  api.get(`/progress/module/${moduleId}`);
 export const getCourseProgress = (courseId: number) =>
   api.get(`/progress/course/${courseId}`);
 

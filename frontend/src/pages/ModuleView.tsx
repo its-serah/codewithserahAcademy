@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import {
   getModule,
   completeBlock,
+  getModuleProgress,
   submitFeedback,
   getMyFeedback,
 } from "../api/endpoints";
@@ -45,13 +46,34 @@ export default function ModuleView() {
 
   useEffect(() => {
     if (!slug || !moduleId) return;
-    getModule(slug, Number(moduleId))
-      .then((res) => setModule(res.data))
-      .catch((err) =>
-        setError(err.response?.data?.detail || "Failed to load module"),
-      )
+    const id = Number(moduleId);
+    Promise.allSettled([getModule(slug, id), getModuleProgress(id)])
+      .then(([moduleResult, progressResult]) => {
+        if (moduleResult.status === "rejected") {
+          setError(
+            moduleResult.reason?.response?.data?.detail ||
+              "Failed to load module",
+          );
+          return;
+        }
+        setModule(moduleResult.value.data);
+        const doneIds =
+          progressResult.status === "fulfilled"
+            ? new Set<number>(
+                progressResult.value.data
+                  .filter((p: { is_completed: boolean }) => p.is_completed)
+                  .map((p: { content_block_id: number }) => p.content_block_id),
+              )
+            : new Set<number>();
+        setCompletedIds(doneIds);
+        const blocks: { id: number }[] = moduleResult.value.data.content_blocks;
+        const firstIncomplete = blocks.findIndex((b) => !doneIds.has(b.id));
+        setCurrentIndex(
+          firstIncomplete === -1 ? blocks.length - 1 : firstIncomplete,
+        );
+      })
       .finally(() => setLoading(false));
-    getMyFeedback(Number(moduleId))
+    getMyFeedback(id)
       .then((res) => {
         if (res.data) {
           setFeedbackRating(res.data.rating);

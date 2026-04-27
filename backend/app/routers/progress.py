@@ -106,6 +106,33 @@ def complete_block(
     return prog
 
 
+@router.get("/module/{module_id}", response_model=list[ProgressOut])
+def module_progress(
+    module_id: int = Path(gt=0),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get the current user's completed blocks for a specific module."""
+    block_ids = [
+        b.id
+        for b in db.query(ContentBlock.id)
+        .filter(ContentBlock.module_id == module_id)
+        .all()
+    ]
+    if not block_ids:
+        return []
+    rows = (
+        db.query(Progress)
+        .filter(
+            Progress.user_id == user.id,
+            Progress.content_block_id.in_(block_ids),
+            Progress.is_completed == True,
+        )
+        .all()
+    )
+    return rows
+
+
 @router.get("/course/{course_id}", response_model=CourseProgressOut)
 def course_progress(
     course_id: int = Path(gt=0),
